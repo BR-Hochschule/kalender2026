@@ -1,0 +1,14 @@
+{
+  "name": "adventskalender",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Adventkalender mit passwortgeschützter Verwaltung und täglicher Freigabe",
+  "engines": { "node": ">=24.0.0" },
+  "scripts": {
+    "start": "node server.mjs",
+    "preview": "node start-local.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "set-password": "node server.mjs --set-password"
+  }
+}
