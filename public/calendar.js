@@ -89,13 +89,11 @@
     frost.className = 'door-frost';
     frost.hidden = true;
     frost.setAttribute('aria-hidden', 'true');
-    frost.append(icon('snow'), icon('snow'), icon('snow'));
+    frost.append(icon('snow'), icon('snow'));
     const number = document.createElement('span');
     number.className = 'door-number';
     number.textContent = formatDay(day);
-    const handle = document.createElement('span');
-    handle.className = 'door-handle';
-    leaf.append(frost, number, handle, icon('check', 'door-check'), icon('lock', 'door-lock'));
+    leaf.append(frost, number, icon('check', 'door-check'), icon('lock', 'door-lock'));
     button.append(inside, leaf);
     button.addEventListener('click', () => openDoor(day, button));
     return button;
