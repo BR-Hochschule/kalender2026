@@ -1,0 +1,92 @@
+name: Adventkalender veröffentlichen
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '7,37 0 1-24 12 *'
+      timezone: Europe/Berlin
+
+permissions: {}
+
+concurrency:
+  group: advent-github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Kalendercode laden
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Veröffentlichung testen
+        run: npm run test:pages
+
+      - name: Privates Inhaltsrepository prüfen
+        env:
+          CONTENT_REPO: ${{ vars.CONTENT_REPOSITORY }}
+          CONTENT_TOKEN: ${{ secrets.CONTENT_READ_TOKEN }}
+        run: |
+          node --input-type=module <<'JS'
+          const { CONTENT_REPO, CONTENT_TOKEN, GITHUB_REPOSITORY } = process.env;
+          if (!CONTENT_REPO || !CONTENT_TOKEN) {
+            throw new Error('CONTENT_REPOSITORY und CONTENT_READ_TOKEN gemäß README einrichten.');
+          }
+          if (!/^[a-z0-9-]+\/[a-z0-9_.-]+$/i.test(CONTENT_REPO) ||
+              CONTENT_REPO.toLowerCase() === GITHUB_REPOSITORY.toLowerCase()) {
+            throw new Error('Ein separates privates Inhaltsrepository angeben.');
+          }
+          const reply = await fetch('https://api.github.com/repos/' + CONTENT_REPO, {
+            headers: { Authorization: 'Bearer ' + CONTENT_TOKEN, Accept: 'application/vnd.github+json' },
+            redirect: 'error',
+          });
+          if (!reply.ok || (await reply.json()).visibility !== 'private') {
+            throw new Error('Das Inhaltsrepository muss privat und mit dem hinterlegten Token lesbar sein.');
+          }
+          JS
+
+      - name: Türchen-Inhalte laden
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ vars.CONTENT_REPOSITORY }}
+          token: ${{ secrets.CONTENT_READ_TOKEN }}
+          path: private-content
+          persist-credentials: false
+
+      - name: Kalender mit fälligen Türchen bauen
+        env:
+          ADVENT_CONTENT_DIR: private-content
+          ADVENT_CONTENT_REPO: ${{ vars.CONTENT_REPOSITORY }}
+        run: npm run build:pages
+
+      - name: Ausschließlich die öffentliche Website bereitstellen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - name: Auf GitHub Pages veröffentlichen
+        id: pages
+        uses: actions/deploy-pages@v4

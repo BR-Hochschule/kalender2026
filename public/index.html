@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#101b29">
   <meta name="description" content="Der Betriebsratskalender 2026 der Hochschule Campus Wien mit 24 Türchen für die Adventzeit.">
   <title>Betriebsratskalender 2026 · Hochschule Campus Wien</title>
-  <link rel="icon" href="/assets/stern.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/calendar.css?v=advent-2026-3">
-  <script src="/calendar.js?v=advent-2026-3" defer></script>
+  <link rel="icon" href="./assets/stern.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./calendar.css?v=advent-2026-4">
+  <script src="./calendar.js?v=advent-2026-4" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#hauptinhalt">Zum Hauptinhalt</a>
@@ -21,7 +21,7 @@
   </svg>
 
   <header class="masthead page-width">
-    <a class="brand" href="/" aria-label="Betriebsrat – zum Kalender">
+    <a class="brand" href="./" aria-label="Betriebsrat – zum Kalender">
       <span class="brand-mark"><svg aria-hidden="true"><use href="#i-star"/></svg></span>
       <span><strong>Betriebsrat</strong><small>Hochschule Campus Wien</small></span>
     </a>
@@ -41,7 +41,7 @@
     <section class="calendar-shell" aria-labelledby="page-title">
       <div class="winter-scene" id="winter-scene" data-phase="evening">
         <div class="scene-world" id="scene-world">
-          <img class="campus-photo" src="/assets/campus-advent-2026.webp" alt="Blick auf die verschneite Hochschule Campus Wien" width="1445" height="1088" fetchpriority="high">
+          <img class="campus-photo" src="./assets/campus-advent-2026.webp" alt="Blick auf die verschneite Hochschule Campus Wien" width="1445" height="1088" fetchpriority="high">
         </div>
         <div class="scene-content">
           <header class="scene-intro">
@@ -94,7 +94,7 @@
             <select id="preview-day"></select>
             <span>Dezember</span>
           </div>
-          <a id="live-mode" href="/">Echtzeit ansehen</a>
+          <a id="live-mode" href="./">Echtzeit ansehen</a>
         </div>
       </section>
     </section>
@@ -102,7 +102,7 @@
 
   <footer class="site-footer page-width">
     <p>Dein Browser merkt sich, welche Türchen du geöffnet hast.</p>
-    <a href="/admin"><svg aria-hidden="true"><use href="#i-lock"/></svg> Verwaltung</a>
+    <a id="manage-calendar" href="/admin"><svg aria-hidden="true"><use href="#i-lock"/></svg> Verwaltung</a>
   </footer>
 
   <dialog class="door-dialog" id="door-dialog" aria-labelledby="dialog-title">

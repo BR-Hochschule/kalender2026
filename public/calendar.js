@@ -12,7 +12,8 @@
   const doorOrder = [7, 18, 2, 15, 9, 23, 12, 4, 21, 6, 17, 10, 1, 14, 8, 24, 3, 20, 16, 5, 22, 11, 19, 13];
   const doorButtons = new Map();
   const formatDay = day => String(day).padStart(2, '0');
-  const requestedPreview = new URLSearchParams(location.search).get('preview') === '1';
+  const pages = document.body.dataset.calendarMode === 'pages';
+  const requestedPreview = !pages && new URLSearchParams(location.search).get('preview') === '1';
   const state = { calendar: null, preview: false, previewDay: 12, phase: 'auto', opened: new Set(), snow: true, snowMotionOptIn: false, serverOffset: 0, opening: false, weather: null };
   const canAnimateSnow = () => !reducedMotion.matches || state.snowMotionOptIn;
   let phaseTimer, activeDoor;
@@ -127,7 +128,7 @@
       } else {
         const meta = doorMetadata(day);
         const future = beforeAdvent || (today !== null && day > today);
-        const scheduled = future && (state.preview ? meta?.available : meta?.published);
+        const scheduled = future && (pages || (state.preview ? meta?.available : meta?.published));
         const closedLabel = `${label} – ${scheduled ? `ab ${day}. Dezember` : 'derzeit nicht verfügbar'}`;
         button.setAttribute('aria-label', closedLabel);
         button.removeAttribute('aria-haspopup');
@@ -201,7 +202,9 @@
     state.opening = true;
     trigger.setAttribute('aria-busy', 'true');
     try {
-      const data = await api(`/api/doors/${day}${state.preview ? '?preview=1' : ''}`);
+      const data = pages
+        ? doorMetadata(day).content
+        : await api(`/api/doors/${day}${state.preview ? '?preview=1' : ''}`);
       const animate = !reducedMotion.matches;
       if (animate) tile.classList.add('is-opening');
       state.weather?.burst();
@@ -542,9 +545,9 @@
   async function loadCalendar() {
     const firstLoad = !state.calendar;
     const previousStorageKey = openedStorageKey(state.calendar);
-    const data = await api(`/api/calendar${requestedPreview ? '?preview=1' : ''}`);
+    const data = await api(pages ? './calendar.json' : `/api/calendar${requestedPreview ? '?preview=1' : ''}`);
     state.calendar = data;
-    state.serverOffset = new Date(data.serverNow).getTime() - Date.now();
+    state.serverOffset = pages ? 0 : new Date(data.serverNow).getTime() - Date.now();
     state.preview = Boolean(data.preview);
     const storageKey = openedStorageKey(data);
     if (previousStorageKey !== storageKey) {

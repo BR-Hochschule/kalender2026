@@ -4,6 +4,7 @@ import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypt
 import { mkdirSync, readFileSync, existsSync, statSync, writeFileSync, unlinkSync } from 'node:fs';
 import { resolve, dirname, join, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { imageMime } from './image-type.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const SESSION_MS = 8 * 60 * 60 * 1000;
@@ -257,10 +258,7 @@ export function createAppServer(options = {}) {
         if (!match || match[2].length % 4 !== 0) fail(400, 'Erlaubt sind JPEG, PNG und WebP.');
         const bytes = Buffer.from(match[2], 'base64');
         if (!bytes.length || bytes.length > MAX_IMAGE) fail(413, 'Das Bild darf maximal 8 MiB groß sein.');
-        let mime;
-        if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) mime = 'image/png';
-        else if (bytes.length >= 4 && bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) mime = 'image/jpeg';
-        else if (bytes.length >= 12 && bytes.subarray(0, 4).toString() === 'RIFF' && bytes.subarray(8, 12).toString() === 'WEBP') mime = 'image/webp';
+        const mime = imageMime(bytes);
         if (!mime || mime !== match[1]) fail(400, 'Die Datei ist kein gültiges JPEG-, PNG- oder WebP-Bild.');
         const imageId = randomBytes(20).toString('hex');
         const imagePath = join(uploads, imageId);

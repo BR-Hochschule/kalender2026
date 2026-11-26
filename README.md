@@ -1,66 +1,51 @@
 # Betriebsratskalender 2026
 
-Adventkalender mit eurem Gebäude im winterlichen Ambiente, 24 Türchen, fünf Tagesstimmungen, animiertem Schnee und einer passwortgeschützten Verwaltung für eine Person.
+Der öffentliche Adventkalender läuft auf GitHub Pages. Besucherinnen und Besucher brauchen kein Konto. Geöffnete Türchen bleiben im jeweiligen Browser gespeichert. Das Winterfoto, die Beleuchtung nach Tageszeit und der Schneefall funktionieren direkt im Browser.
 
-## Lokal ansehen
+Die Redaktion arbeitet im privaten GitHub-Repository. GitHub Actions stellt den Kalender mit den inzwischen fälligen Türchen und ihren Bildern bereit. Geplante Läufe sind am 1. bis 24. Dezember um 00:07 und 00:37 Uhr in der Zeitzone Europe/Berlin. Ein Lauf kann sich bei GitHub verzögern. Geschlossene Türchen enthalten in der öffentlichen Ausgabe keine Texte, Links oder Bilder.
 
-Node.js ab Version 24 genügt. Im Kalenderordner ausführen.
+## Einmalige Einrichtung auf GitHub
+
+1. Unter eurem GitHub-Konto ein separates **privates** Repository anlegen, etwa `BR-Hochschule/klender2026-inhalte`. Die entpackte Inhaltsvorlage dort hochladen. Die Dateien `tueren/01.json` bis `tueren/24.json` liegen direkt im Unterordner `tueren/`. Bilder kommen in `bilder/`.
+2. Einen **Fine-grained personal access token** für genau das private Inhaltsrepository erstellen. Unter **Repository permissions → Contents** genügt **Read-only**. Als **Resource owner** das Konto wählen, zu dem das Inhaltsrepository gehört. [GitHub-Anleitung für Zugriffstoken](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+3. Im öffentlichen Repository `klender2026` unter **Settings → Secrets and variables → Actions** den Token als Repository-Secret `CONTENT_READ_TOKEN` hinterlegen. Unter **Variables** die Repository-Variable `CONTENT_REPOSITORY` mit `BR-Hochschule/klender2026-inhalte` anlegen. Bei einem anderen Namen entsprechend `Konto/Repository` eintragen. [Actions-Einstellungen öffnen](https://github.com/BR-Hochschule/klender2026/settings/secrets/actions)
+4. Im öffentlichen Repository unter **Settings → Pages** die Quelle **GitHub Actions** auswählen. [Pages-Einstellungen öffnen](https://github.com/BR-Hochschule/klender2026/settings/pages)
+5. Unter **Actions → Adventkalender veröffentlichen → Run workflow** den ersten Lauf auf `main` starten. Bei erfolgreichem Lauf steht die Website unter [br-hochschule.github.io/klender2026](https://br-hochschule.github.io/klender2026/).
+
+## Türchen bearbeiten
+
+Im privaten Repository die Datei für den Tag öffnen und über das Stiftsymbol bearbeiten. `tueren/06.json` ist zum Beispiel der 6. Dezember. Eine Datei kann so aussehen:
+
+```json
+{
+  "titel": "Ein Gruß zum Nikolaus",
+  "text": "Wir wünschen euch einen schönen Nikolaustag!\n\nViel Spaß mit der heutigen Überraschung.",
+  "bild": "nikolaus.webp",
+  "bildbeschreibung": "Lebkuchen-Nikolaus auf einem roten Teller",
+  "links": [
+    { "titel": "Unser Keksrezept", "url": "https://example.org/keksrezept" }
+  ],
+  "freigeben": true
+}
+```
+
+- Bei `"freigeben": false` bleibt das Türchen ein Entwurf. Bei `true` ist es ab seinem Dezembertag für die Veröffentlichung vorgesehen.
+- Für mehrzeilige Texte in der Datei `\n` verwenden. Ohne Bild kann `"bild": ""` stehen. Ohne Links `"links": []` verwenden.
+- Bilder in `bilder/` hochladen und den exakten Dateinamen eintragen. Unterstützt werden JPG, PNG und WebP bis 8 MiB. Aussagekräftige Alternativtexte gehören in `bildbeschreibung`. Bei einem rein dekorativen Bild kann das Feld leer bleiben.
+- Die Änderung mit **Commit changes** speichern. Falls ein bereits fälliges Türchen sofort aktualisiert werden soll, im öffentlichen Repository den Workflow erneut starten. Fehlerhafte Dateien meldet der Workflow mit der betroffenen Türchennummer. Bis zum nächsten erfolgreichen Lauf bleibt die letzte Veröffentlichung online.
+
+Die Verknüpfung **Verwaltung** am Ende der veröffentlichten Seite führt in das private Repository. Die Anmeldung erfolgt dort mit dem eigenen GitHub-Konto.
+
+## Lokal prüfen
+
+Die Veröffentlichungsdateien liegen nach dem Build in `dist/`. Dazu genügt Node.js ab Version 24.
 
 ```sh
-npm run preview
+npm run test:pages
+npm run build:pages
+python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
 ```
 
-[Vorschau](http://127.0.0.1:4173/?preview=1) · [Verwaltung](http://127.0.0.1:4173/admin)
+Anschließend [lokalen Pages-Build ansehen](http://127.0.0.1:4173/). Der Build zeigt ohne Inhaltsordner den Kalender mit geschlossenen Türchen. Mit `ADVENT_CONTENT_DIR=private-content npm run build:pages` verwendet er die Inhalte aus einem lokal entpackten, privaten Inhaltsordner und prüft das aktuelle Datum. `dist/` wird bei jedem Build neu erstellt.
 
-Beim ersten lokalen Start wird ein zufälliges Adminpasswort erzeugt. Benutzername und Passwort stehen ausschließlich in `data/ADMIN-ZUGANG.txt`. Die Datei wird nicht über den Webserver ausgeliefert und ist von Git ausgeschlossen.
-
-In der Vorschau lassen sich die Tagesstimmung und der Probetag auswählen. Standard ist der 12. Dezember mit Beleuchtung nach der aktuellen Uhrzeit in `Europe/Berlin`. Eine manuell gewählte Stimmung gilt für die geöffnete Vorschau. „Auto“ kehrt zur Uhrzeit zurück. Geöffnete Vorschautürchen werden getrennt von echten Türchen im Browser gespeichert. Über „Echtzeit ansehen“ wird die normale Datumsfreigabe verwendet. Vor dem 1. Dezember des eingestellten Kalenderjahrs sind dort alle Türchen gesperrt.
-
-## Von 2025 zu 2026
-
-Der Kalender übernimmt das gemischte Raster von 2025. Die Türchen behalten ihre Position beim Neuladen. Beim Öffnen gleiten zwei Vorhangflügel auseinander und es fällt kurz mehr Schnee. Die Karte zeigt Text und bei Bedarf ein Bild und Links.
-
-Für die öffentliche Freigabe prüft der Server das vollständige Dezemberdatum im eingestellten Kalenderjahr. Die 24 Türchen für 2026 enthalten editierbare Beispiele. Historische Archive dienen als redaktionelle Vorlage.
-
-## Inhalte bearbeiten
-
-In der Verwaltung anmelden, einen Dezembertag auswählen und Titel, Text, Bild und Links bearbeiten. Unterstützt werden JPEG, PNG und WebP bis 8 MiB. „Als Entwurf speichern“ hält einen Inhalt zurück; mit „Für den Advent freigeben“ und anschließend „Speichern“ wird der öffentliche Abruf ab seinem Dezembertag erlaubt. Die Freigabe setzt die Datumsprüfung nicht außer Kraft. Das Kalenderjahr lässt sich ebenfalls ändern.
-
-Die Verwaltung bietet eine Inhaltsvorschau und eine Kalender-Vorschau für angemeldete Admins, auch vor Dezember. Besucher benötigen keinen Zugang. Die Information über geöffnete Türchen liegt nur im jeweiligen Browser (`localStorage`) und wird pro Kalenderjahr gespeichert.
-
-Für informative Bilder in den Türchen einen aussagekräftigen Alternativtext angeben. Bei rein dekorativen Bildern bleibt dieses Feld leer.
-
-## Auf eurem Webspace betreiben
-
-Die App benötigt eine dauerhaft laufende Node.js-Instanz und ein beschreibbares, dauerhaftes Datenverzeichnis. Der Startbefehl ist `npm start` beziehungsweise `node server.mjs`. Die öffentliche URL wird mit eurem HTTPS-Webserver auf den internen Node-Port weitergeleitet. Nur `public/` enthält statisch öffentliche Dateien; `data/` darf niemals als öffentliches Verzeichnis konfiguriert werden.
-
-Umgebungsvariablen gemäß `.env.example` über die Serververwaltung setzen (die Anwendung lädt `.env` nicht automatisch). Für die erste Einrichtung `ADMIN_USER` und ein eigenes `ADMIN_PASSWORD` mit mindestens zwölf Zeichen sicher als Umgebungsvariablen setzen. Im Produktionsbetrieb `NODE_ENV=production` verwenden, `PREVIEW_MODE` nicht setzen und nicht `start-local.mjs` starten. Die offene lokale Vorschau ist im Produktionsmodus technisch gesperrt; die authentifizierte Adminvorschau bleibt möglich.
-
-`TRUST_PROXY=1` nur verwenden, wenn der vorgeschaltete HTTPS-Proxy die Weiterleitungsheader selbst setzt und der Node-Port nicht direkt öffentlich zugänglich ist. Der Proxy muss `Host` und `Origin` beibehalten und `X-Forwarded-Proto: https` setzen. Damit werden sichere Sitzungscookies verwendet.
-
-Ein vergessenes Passwort lässt sich serverseitig mit `node server.mjs --set-password` zurücksetzen, nachdem `ADMIN_USER` und `ADMIN_PASSWORD` sicher in der Serverumgebung gesetzt wurden. Dabei werden alle Sitzungen abgemeldet. Keine Passwörter in öffentliche Dateien oder die Kommandozeile schreiben.
-
-## Speicherung und Freigabe
-
-- Texte, Links, Einstellungen und Adminzugang: `data/calendar.sqlite`.
-- Bilder: `data/uploads/`, Abruf ausschließlich über datumsgeprüfte oder authentifizierte Serverrouten.
-- Freigabe jeweils ab Mitternacht in `Europe/Berlin`; frühere Tage bleiben zugänglich.
-- Tagesphasen sind Morgen von 06–11 Uhr, Mittag von 11–14 Uhr, Nachmittag von 14–17 Uhr, Abend von 17–22 Uhr und Nacht von 22–06 Uhr. Helligkeit und Farbtemperatur passen sich automatisch an, auch bei geöffneter Seite.
-- Alle Flocken kommen von oberhalb des Bildrands und sammeln sich während des Besuchs als Schneedecke. Nähere Flocken zeigen feine, sechsarmige Kristalle. Beim Öffnen eines Türchens kommen etwa vier Sekunden lang mehr Flocken von oben; sie fallen anschließend bis zur Schneedecke weiter. Mit dem Schalter „Schnee“ lässt sich der Effekt ausblenden. Bei reduzierter Bewegung bleibt der Schnee zunächst ruhig. Mit „Schneefall animieren“ lässt sich die Bewegung für die geöffnete Ansicht ausdrücklich einschalten und wieder stoppen.
-- Kalender und Verwaltung passen sich dem Handy an. Das Raster behält seine gemischte Reihenfolge bei und wechselt passend zur verfügbaren Breite die Anzahl der Spalten.
-
-Die Umsetzung orientiert sich an [WCAG 2.2 AA](https://www.w3.org/TR/WCAG22/), insbesondere bei Kontrast, Tastaturbedienung, Fokusführung, Bedienflächen und der Möglichkeit, Bewegung abzuschalten. Die Barrierefreiheit der Türcheninhalte hängt auch von den hinterlegten Texten, Bildbeschreibungen und Links ab.
-
-Datenbank und Bilder gemeinsam sichern. Für eine einfache vollständige Dateisicherung die Node-Anwendung kurz beenden und das gesamte `data/`-Verzeichnis sichern, anschließend neu starten. Das gesamte Verzeichnis auf dauerhaftem Serverspeicher halten.
-
-## Prüfen
-
-```powershell
-npm test
-```
-
-Integrationstests prüfen Anmeldung, Sitzung und CSRF, öffentliche Datumsfreigabe, Uploads und Bildschutz, Datenspeicherung, Entwürfe, Loginbegrenzung und Produktionssperre der offenen Vorschau.
-
-## Kalenderhintergrund
-
-Für den Kalenderhintergrund 2026 liegt das neue Foto als `public/assets/campus-advent-2026.webp` vor. Beim WebP-Export bleibt die Bildgeometrie erhalten. Die wechselnden Lichtstimmungen entstehen in `public/calendar.css`. Der Schneefall wird im Browser darübergelegt.
+Für die vorhandene lokale Vorschau mit einstellbarem Probetag und Beispielinhalten steht weiterhin `npm run preview` zur Verfügung. Ihr zufällig erzeugtes Verwaltungspasswort liegt in `data/ADMIN-ZUGANG.txt`. Die lokale Vorschau, der Node-Server und die SQLite-Datenbank sind von der Pages-Veröffentlichung getrennt.
