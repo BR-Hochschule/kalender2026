@@ -16,11 +16,11 @@ Schneefall und Tagesbeleuchtung starten beim Laden. Die Beleuchtung wechselt auc
 
 ## Einmalige Einrichtung auf GitHub
 
-1. Unter eurem GitHub-Konto ein separates **privates** Repository anlegen, etwa `BR-Hochschule/klender2026-inhalte`. Die entpackte Inhaltsvorlage dort hochladen. Die Dateien `tueren/01.json` bis `tueren/24.json` liegen direkt im Unterordner `tueren/`. Bilder kommen in `bilder/`.
+1. Unter eurem GitHub-Konto ein separates **privates** Repository anlegen, etwa `BR-Hochschule/kalender2026-inhalte`. Die entpackte Inhaltsvorlage dort hochladen. Die Dateien `tueren/01.json` bis `tueren/24.json` liegen direkt im Unterordner `tueren/`. Bilder kommen in `bilder/`.
 2. Einen **Fine-grained personal access token** für genau das private Inhaltsrepository erstellen. Unter **Repository permissions → Contents** genügt **Read-only**. Als **Resource owner** das Konto wählen, zu dem das Inhaltsrepository gehört. [GitHub-Anleitung für Zugriffstoken](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
-3. Im öffentlichen Repository `klender2026` unter **Settings → Secrets and variables → Actions** den Token als Repository-Secret `CONTENT_READ_TOKEN` hinterlegen. Unter **Variables** die Repository-Variable `CONTENT_REPOSITORY` mit `BR-Hochschule/klender2026-inhalte` anlegen. Bei einem anderen Namen entsprechend `Konto/Repository` eintragen. [Actions-Einstellungen öffnen](https://github.com/BR-Hochschule/klender2026/settings/secrets/actions)
-4. Im öffentlichen Repository unter **Settings → Pages** die Quelle **GitHub Actions** auswählen. [Pages-Einstellungen öffnen](https://github.com/BR-Hochschule/klender2026/settings/pages)
-5. Unter **Actions → Adventkalender veröffentlichen → Run workflow** den ersten Lauf auf `main` starten. Bei erfolgreichem Lauf steht die Website unter [br-hochschule.github.io/klender2026](https://br-hochschule.github.io/klender2026/).
+3. Im öffentlichen Repository `kalender2026` unter **Settings → Secrets and variables → Actions** den Token als Repository-Secret `CONTENT_READ_TOKEN` hinterlegen. Unter **Variables** die Repository-Variable `CONTENT_REPOSITORY` mit `BR-Hochschule/kalender2026-inhalte` anlegen. Bei einem anderen Namen entsprechend `Konto/Repository` eintragen. [Actions-Einstellungen öffnen](https://github.com/BR-Hochschule/kalender2026/settings/secrets/actions)
+4. Im öffentlichen Repository unter **Settings → Pages** die Quelle **GitHub Actions** auswählen. [Pages-Einstellungen öffnen](https://github.com/BR-Hochschule/kalender2026/settings/pages)
+5. Unter **Actions → Adventkalender veröffentlichen → Run workflow** den ersten Lauf auf `main` starten. Bei erfolgreichem Lauf steht die Website unter [br-hochschule.github.io/kalender2026](https://br-hochschule.github.io/kalender2026/).
 
 Änderungen am Kalendercode, die nach `main` hochgeladen werden, lösen sofort einen neuen Veröffentlichungs-Lauf aus.
 

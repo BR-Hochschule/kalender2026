@@ -34,7 +34,7 @@ function exampleDoor(day) {
     imageUrl: day === 11 ? './assets/campus-advent-2026.webp' : '',
     imageAlt: day === 11 ? 'Die verschneite Hochschule Campus Wien' : '',
     links: day === 10 ? [
-      { label: 'Beispiellink öffnen', url: 'https://github.com/BR-Hochschule/klender2026' },
+      { label: 'Beispiellink öffnen', url: 'https://github.com/BR-Hochschule/kalender2026' },
     ] : [],
   };
 }
