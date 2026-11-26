@@ -265,7 +265,12 @@ h1 em { color: #f4d29d; font-weight: 400; }
   gap: clamp(.45rem, 1.1vw, .85rem);
 }
 
-/* Each shutter swings around its outer edge to reveal the lit interior. */
+@property --frost-thaw {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: -8%;
+}
+
 .calendar-door {
   position: relative;
   isolation: isolate;
@@ -341,7 +346,6 @@ h1 em { color: #f4d29d; font-weight: 400; }
   display: grid;
   place-items: center;
   padding: .25rem;
-  perspective: 13rem;
   pointer-events: none;
 }
 
@@ -349,23 +353,55 @@ h1 em { color: #f4d29d; font-weight: 400; }
   inset-block: 0;
   inline-size: 50%;
   background: linear-gradient(155deg, var(--tile-top), var(--tile-bottom));
-  backface-visibility: hidden;
-  transform: rotateY(0deg);
   content: "";
-  transition: transform .36s cubic-bezier(.22,.68,.27,1);
 }
 
 .door-leaf::before {
   inset-inline-start: 0;
-  transform-origin: left center;
   border-inline-end: 1px solid #0004;
   box-shadow: inset .29rem 0 0 -.23rem var(--trim), inset 0 .3rem 0 -.24rem var(--trim), inset 0 -.3rem 0 -.24rem var(--trim);
 }
 
 .door-leaf::after {
   inset-inline-end: 0;
-  transform-origin: right center;
   box-shadow: inset -.29rem 0 0 -.23rem var(--trim), inset 0 .3rem 0 -.24rem var(--trim), inset 0 -.3rem 0 -.24rem var(--trim);
+}
+
+.door-frost {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: clip;
+  color: #e2f7ed;
+  opacity: .58;
+}
+
+.door-frost svg {
+  position: absolute;
+  inline-size: 58%;
+  block-size: 85%;
+  stroke-width: .72;
+}
+
+.door-frost svg:first-child {
+  inset-inline-start: -21%;
+  inset-block-start: -34%;
+  transform: rotate(14deg);
+}
+
+.door-frost svg:nth-child(2) {
+  inset-inline-start: 11%;
+  inset-block-start: -13%;
+  inline-size: 25%;
+  block-size: 48%;
+  opacity: .78;
+  transform: rotate(-23deg);
+}
+
+.door-frost svg:last-child {
+  inset-inline-end: -19%;
+  inset-block-end: -39%;
+  transform: rotate(26deg);
 }
 
 .door-number {
@@ -395,11 +431,18 @@ h1 em { color: #f4d29d; font-weight: 400; }
 .is-open .door-handle, .is-locked .door-handle { display: none; }
 .is-today .door-handle { color: #315d37; }
 
-.door-leaf > * { transition: opacity .1s ease-out; }
-.calendar-door.is-opening .door-leaf::before { transform: rotateY(-95deg); }
-.calendar-door.is-opening .door-leaf::after { transform: rotateY(95deg); }
-.calendar-door.is-opening .door-leaf > * { opacity: 0; }
+.calendar-door.is-opening .door-leaf {
+  mask-image: radial-gradient(ellipse farthest-corner at center, transparent var(--frost-thaw, -8%), #000 calc(var(--frost-thaw, -8%) + 8%));
+  animation: frost-melt .39s ease-in-out forwards;
+}
+
 .calendar-door.is-opening .door-inside::before { opacity: 1; }
+
+@keyframes frost-melt {
+  from { --frost-thaw: -8%; opacity: 1; }
+  76% { opacity: 1; }
+  to { --frost-thaw: 100%; opacity: 0; }
+}
 
 .scene-loading, .error-message {
   margin: .75rem 0;
@@ -654,6 +697,7 @@ h1 em { color: #f4d29d; font-weight: 400; }
 }
 
 @media (forced-colors: active) {
+  .door-frost { display: none; }
   .calendar-door { border-color: ButtonText; }
   .calendar-door.is-today { border: 2px solid Highlight; }
   :is(a, button, select, [tabindex]):focus-visible { outline-color: Highlight; }
