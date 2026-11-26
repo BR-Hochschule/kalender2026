@@ -32,7 +32,6 @@ Im privaten Repository die Datei für den Tag öffnen und über das Stiftsymbol 
 {
   "titel": "Ein Gruß zum Nikolaus",
   "text": "Wir wünschen euch einen schönen Nikolaustag!\n\nViel Spaß mit der heutigen Überraschung.",
-  "bild": "nikolaus.webp",
   "bildbeschreibung": "Lebkuchen-Nikolaus auf einem roten Teller",
   "links": [
     { "titel": "Unser Keksrezept", "url": "https://example.org/keksrezept" }
@@ -42,9 +41,16 @@ Im privaten Repository die Datei für den Tag öffnen und über das Stiftsymbol 
 ```
 
 - Bei `"freigeben": false` bleibt das Türchen ein Entwurf. Bei `true` ist es ab seinem Dezembertag für die Veröffentlichung vorgesehen.
-- Für mehrzeilige Texte in der Datei `\n` verwenden. Ohne Bild kann `"bild": ""` stehen. Ohne Links `"links": []` verwenden.
-- Bilder in `bilder/` hochladen und den exakten Dateinamen eintragen. Unterstützt werden JPG, PNG und WebP bis 8 MiB. Aussagekräftige Alternativtexte gehören in `bildbeschreibung`. Bei einem rein dekorativen Bild kann das Feld leer bleiben.
+- Für mehrzeilige Texte in der Datei `\n` verwenden. Ohne Links `"links": []` verwenden.
 - Die Änderung mit **Commit changes** speichern. Falls ein bereits fälliges Türchen sofort aktualisiert werden soll, im öffentlichen Repository den Workflow erneut starten. Fehlerhafte Dateien meldet der Workflow mit der betroffenen Türchennummer. Bis zum nächsten erfolgreichen Lauf bleibt die letzte Veröffentlichung online.
+
+### Bilder direkt auf GitHub hochladen
+
+Im privaten Inhaltsrepository den Ordner `bilder/` öffnen und **Add file → Upload files** wählen. Der Dateiname ordnet das Foto zu. `1.png` gehört zu Türchen 1, `6.jpg` zu Türchen 6 und `24.webp` zu Türchen 24. Unterstützt werden PNG, JPG, JPEG und WebP bis 8 MiB. Namen mit führender Null wie `01.jpg` funktionieren ebenfalls.
+
+Das Foto erscheint bei der nächsten Veröffentlichung in seinem Türchen, sobald dessen Dezembertag erreicht ist und die Inhaltsdatei freigegeben wurde. In `bildbeschreibung` lässt sich ein Alternativtext für das Foto hinterlegen. Wenn bereits ein fester Dateiname im Feld `bild` steht, hat er Vorrang. Bei mehreren nummerierten Bildern sucht der Kalender zuerst ohne führende Null und dann in der Reihenfolge PNG, JPG, JPEG und WebP.
+
+Die Anleitung im privaten Inhalts-Paket beschreibt auch den optionalen automatischen Start der Veröffentlichung bei Änderungen in `bilder/` oder `tueren/`.
 
 ## Lokal prüfen
 

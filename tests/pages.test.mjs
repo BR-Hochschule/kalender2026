@@ -99,6 +99,39 @@ test('verhindert das Kopieren von Bildpfaden außerhalb des privaten Bilderordne
   await assert.rejects(build('2026-12-01T08:00:00Z'), /Türchen 01.*Bildformat/);
 });
 
+test('ordnet nummerierte Bilder automatisch zu und übernimmt sie erst am Veröffentlichungstag', async t => {
+  const { content, out, door, build } = await fixture(t);
+  const webp = await readFile(new URL('../public/assets/campus-advent-2026.webp', import.meta.url));
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/dJcAAAAASUVORK5CYII=', 'base64');
+  await door('01', { bildbeschreibung: 'Bild für den ersten Dezember' });
+  await door('02', { bild: '' });
+  await door('03', { bild: 'fest.png' });
+  await writeFile(join(content, 'bilder', '01.png'), png);
+  await writeFile(join(content, 'bilder', '02.webp'), webp);
+  await writeFile(join(content, 'bilder', '3.webp'), webp);
+  await writeFile(join(content, 'bilder', 'fest.png'), png);
+
+  const preview = await build('2026-11-30T22:59:59Z');
+  assert.equal(preview.doors[0].content.imageUrl, '');
+  assert.ok(!(await readdir(out)).includes('media'));
+
+  const first = await build('2026-11-30T23:00:00Z');
+  assert.equal(first.doors[0].content.imageAlt, 'Bild für den ersten Dezember');
+  assert.match(first.doors[0].content.imageUrl, /\.png$/);
+  assert.deepEqual(await readdir(join(out, 'media')), [first.doors[0].content.imageUrl.split('/').pop()]);
+
+  await writeFile(join(content, 'bilder', '1.WEBP'), webp);
+  const second = await build('2026-12-02T12:00:00Z');
+  assert.match(second.doors[0].content.imageUrl, /\.webp$/);
+  assert.match(second.doors[1].content.imageUrl, /\.webp$/);
+  assert.deepEqual(await readFile(join(out, second.doors[1].content.imageUrl)), webp);
+  assert.deepEqual(second.doors[2], { day: 3, available: false });
+
+  const third = await build('2026-12-03T12:00:00Z');
+  assert.match(third.doors[2].content.imageUrl, /\.png$/);
+  assert.deepEqual(await readFile(join(out, third.doors[2].content.imageUrl)), png);
+});
+
 test('verwirft nicht sichere Linkprotokolle und hält Entwürfe zurück', async t => {
   const { door, build } = await fixture(t);
   const links = [{ titel: 'Link', url: 'javascript:alert(1)' }];

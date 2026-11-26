@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { copyFile, lstat, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, lstat, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { basename, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { imageMime } from '../image-type.mjs';
@@ -19,7 +19,7 @@ const publicFiles = [
   'assets/instrument-serif-OFL.txt',
 ];
 const maxImageSize = 8 * 1024 * 1024;
-const imageTypes = new Map([['.jpeg', 'image/jpeg'], ['.jpg', 'image/jpeg'], ['.png', 'image/png'], ['.webp', 'image/webp']]);
+const imageTypes = new Map([['.png', 'image/png'], ['.jpg', 'image/jpeg'], ['.jpeg', 'image/jpeg'], ['.webp', 'image/webp']]);
 
 function dateKey(date) {
   const parts = Object.fromEntries(dateFormat.formatToParts(date).map(part => [part.type, part.value]));
@@ -78,15 +78,34 @@ function readLinks(links = []) {
   });
 }
 
+async function findNumberedImage(directory, day) {
+  try {
+    if (!(await lstat(directory)).isDirectory()) throw new Error('Der Inhaltsordner muss ein Verzeichnis sein.');
+    const files = (await readdir(directory)).sort();
+    const names = new Map(files.map(name => [name.toLowerCase(), name]));
+    for (const number of [String(Number(day)), day]) {
+      for (const extension of imageTypes.keys()) {
+        const name = names.get(number + extension);
+        if (name) return name;
+      }
+    }
+    return '';
+  } catch (error) {
+    if (error.code === 'ENOENT') return '';
+    throw error;
+  }
+}
+
 async function readImage(contentDir, day, value = '') {
-  const name = cleanText(value, 180, 'Bilddatei');
+  const directory = join(contentDir, 'bilder');
+  const name = cleanText(value, 180, 'Bilddatei') || await findNumberedImage(directory, day);
   if (!name) return null;
   const extension = extname(name).toLowerCase();
   const mime = imageTypes.get(extension);
   if (name !== basename(name) || /[\\\x00-\x1f]/.test(name) || !mime) {
     throw new Error('Als Bild bitte einen Dateinamen mit JPG, PNG oder WebP angeben.');
   }
-  const file = await regularFile(join(contentDir, 'bilder'), name);
+  const file = await regularFile(directory, name);
   if (!file || !file.size || file.size > maxImageSize) {
     throw new Error('Das Bild fehlt oder liegt außerhalb der erlaubten Größe von 8 MiB.');
   }
