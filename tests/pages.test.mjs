@@ -18,7 +18,7 @@ async function fixture(t) {
     }));
   };
   const build = async (timestamp) => {
-    await buildPages({ contentDir: content, contentRepository: 'example/privat', out, now: new Date(timestamp) });
+    await buildPages({ contentDir: content, out, now: new Date(timestamp) });
     return JSON.parse(await readFile(join(out, 'calendar.json'), 'utf8'));
   };
   return { content, out, door, build };
@@ -53,7 +53,6 @@ test('veröffentlicht Text, Links und Bilder erst ab Mitternacht in Europe/Berli
   const html = await readFile(join(out, 'index.html'), 'utf8');
   assert.match(html, /data-calendar-mode="pages"/);
   assert.match(html, /src="\.\/assets\/campus-advent-2026.webp"/);
-  assert.match(html, /href="https:\/\/github\.com\/example\/privat"/);
 
   const after = await build('2027-01-01T00:00:00Z');
   assert.deepEqual(after.doors.filter(door => door.available).map(door => door.day), [1, 2, 24]);

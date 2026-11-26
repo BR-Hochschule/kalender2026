@@ -78,46 +78,7 @@ svg {
   margin-inline: auto;
 }
 
-main { padding-block-start: clamp(.5rem, 2vw, 1.5rem); }
-
-.snow-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .55rem;
-  min-block-size: 2.75rem;
-  padding: .4rem .75rem;
-  border: 1px solid #718498;
-  border-radius: .45rem;
-  background: #1d2c3c;
-  color: var(--cream);
-  font-size: .875rem;
-  line-height: 1.25;
-}
-
-.snow-toggle:hover { background: #30475e; }
-
-.toggle-track {
-  position: relative;
-  inline-size: 1.85rem;
-  block-size: 1rem;
-  border: 1px solid #7f93a3;
-  border-radius: 2rem;
-  background: #1a2631;
-}
-
-.toggle-track::after {
-  position: absolute;
-  inset: .125rem auto auto .14rem;
-  inline-size: .625rem;
-  block-size: .625rem;
-  border-radius: 50%;
-  background: #deebf4;
-  content: "";
-}
-
-.snow-toggle[aria-pressed="true"] .toggle-track { border-color: #dac291; background: #dcbb80; }
-.snow-toggle[aria-pressed="true"] .toggle-track::after { inset-inline-start: .95rem; background: #26394a; }
+main { padding-block: clamp(.5rem, 2vw, 1.5rem); }
 
 .calendar-shell { border: 1px solid #637487; border-radius: 1rem; }
 
@@ -478,6 +439,24 @@ h1 em { color: #f4d29d; font-weight: 400; }
 
 .door-legend svg { inline-size: .9rem; block-size: .9rem; }
 
+.snow-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 1px solid #718498;
+  border-radius: .45rem;
+  background: #1d2c3c;
+  color: var(--brass);
+}
+
+.snow-toggle:hover { background: #30475e; }
+.snow-toggle[aria-pressed="true"] .snow-off { display: none; }
+.snow-toggle[aria-pressed="false"] { color: var(--secondary); }
+
 #snow-canvas, .dialog-snow {
   position: absolute;
   z-index: 10;
@@ -485,28 +464,6 @@ h1 em { color: #f4d29d; font-weight: 400; }
   inline-size: 100%;
   block-size: 100%;
   pointer-events: none;
-}
-
-.site-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: .2rem 1rem;
-  padding: .9rem .2rem 1.5rem;
-  color: #cbd8e4;
-  font-size: .875rem;
-}
-
-.site-footer p { margin: .35rem 0; }
-.site-footer a { display: inline-flex; align-items: center; gap: .5rem; min-block-size: 2.75rem; }
-.site-footer svg { color: var(--brass); }
-
-.footer-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: .5rem 1rem;
 }
 
 .door-dialog {
@@ -684,5 +641,4 @@ h1 em { color: #f4d29d; font-weight: 400; }
   .calendar-door { border-color: ButtonText; }
   .calendar-door.is-today { border: 2px solid Highlight; }
   :is(a, button, select, [tabindex]):focus-visible { outline-color: Highlight; }
-  .toggle-track::after { background: ButtonText; }
 }

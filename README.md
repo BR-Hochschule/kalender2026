@@ -12,7 +12,7 @@ Für die November-Version auf GitHub reicht es, den Code zu übertragen, unter *
 
 Am 1. Dezember um Mitternacht endet die Vorschau in der Zeitzone Europe/Berlin. Auch eine noch zwischengespeicherte November-Seite sperrt dann die Beispieltürchen. Sobald GitHub die Advent-Version bereitstellt, öffnen sich die veröffentlichten Türchen nach Datum.
 
-Schneefall und Tagesbeleuchtung starten beim Laden. Die Beleuchtung wechselt auch bei offenem Kalender automatisch. Unter dem Kalender lässt sich der Schneefall mit „Schnee“ anhalten und wieder einschalten. Bei reduzierter Bewegung fallen weniger Flocken und sie bewegen sich langsamer.
+Schneefall und Tagesbeleuchtung starten beim Laden. Die Beleuchtung wechselt auch bei offenem Kalender automatisch. Mit dem Schneeflocken-Symbol im Kalender lässt sich der Schneefall anhalten und wieder einschalten. Bei reduzierter Bewegung fallen weniger Flocken und sie bewegen sich langsamer.
 
 ## Einmalige Einrichtung auf GitHub
 
@@ -45,8 +45,6 @@ Im privaten Repository die Datei für den Tag öffnen und über das Stiftsymbol 
 - Für mehrzeilige Texte in der Datei `\n` verwenden. Ohne Bild kann `"bild": ""` stehen. Ohne Links `"links": []` verwenden.
 - Bilder in `bilder/` hochladen und den exakten Dateinamen eintragen. Unterstützt werden JPG, PNG und WebP bis 8 MiB. Aussagekräftige Alternativtexte gehören in `bildbeschreibung`. Bei einem rein dekorativen Bild kann das Feld leer bleiben.
 - Die Änderung mit **Commit changes** speichern. Falls ein bereits fälliges Türchen sofort aktualisiert werden soll, im öffentlichen Repository den Workflow erneut starten. Fehlerhafte Dateien meldet der Workflow mit der betroffenen Türchennummer. Bis zum nächsten erfolgreichen Lauf bleibt die letzte Veröffentlichung online.
-
-Die Verknüpfung **Verwaltung** am Ende der veröffentlichten Seite führt in das private Repository. Die Anmeldung erfolgt dort mit dem eigenen GitHub-Konto.
 
 ## Lokal prüfen
 

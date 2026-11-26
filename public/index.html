@@ -7,7 +7,7 @@
   <meta name="description" content="Der Betriebsratskalender 2026 der Hochschule Campus Wien mit 24 Türchen für die Adventzeit.">
   <title>Betriebsratskalender 2026 · Hochschule Campus Wien</title>
   <link rel="icon" href="./assets/stern.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./calendar.css?v=advent-2026-9">
+  <link rel="stylesheet" href="./calendar.css?v=advent-2026-10">
   <script src="./calendar.js?v=advent-2026-7" defer></script>
 </head>
 <body>
@@ -52,6 +52,9 @@
                 <span class="progress-track" aria-hidden="true"><span id="progress-fill"></span></span>
               </div>
               <span class="door-legend" id="door-legend"><svg aria-hidden="true"><use href="#i-lock"/></svg> Öffnet am jeweiligen Dezembertag</span>
+              <button class="snow-toggle" id="snow-toggle" type="button" aria-label="Schneefall" aria-pressed="true" title="Schneefall ein- und ausschalten">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-snow"/><path class="snow-off" d="m3 3 18 18"/></svg>
+              </button>
             </div>
           </section>
         </div>
@@ -59,16 +62,6 @@
       </div>
     </section>
   </main>
-
-  <footer class="site-footer page-width">
-    <p>Dein Browser merkt sich, welche Türchen du geöffnet hast.</p>
-    <div class="footer-actions">
-      <button class="snow-toggle" id="snow-toggle" type="button" aria-pressed="true">
-        <svg aria-hidden="true"><use href="#i-snow"/></svg><span>Schnee</span><span class="toggle-track" aria-hidden="true"></span>
-      </button>
-      <a id="manage-calendar" href="/admin"><svg aria-hidden="true"><use href="#i-lock"/></svg> Verwaltung</a>
-    </div>
-  </footer>
 
   <dialog class="door-dialog" id="door-dialog" aria-labelledby="dialog-title">
     <div class="dialog-controls">

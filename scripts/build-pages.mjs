@@ -10,7 +10,6 @@ const year = 2026;
 const timeZone = 'Europe/Berlin';
 const dateFormat = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' });
 const publicFiles = ['calendar.css', 'calendar.js', 'assets/campus-advent-2026.webp', 'assets/stern.svg'];
-const repoPattern = /^[a-z0-9-]+\/[a-z0-9_.-]+$/i;
 const maxImageSize = 8 * 1024 * 1024;
 const imageTypes = new Map([['.jpeg', 'image/jpeg'], ['.jpg', 'image/jpeg'], ['.png', 'image/png'], ['.webp', 'image/webp']]);
 
@@ -113,8 +112,7 @@ async function readDoor(contentDir, day, number) {
   }
 }
 
-export async function buildPages({ contentDir, contentRepository, out = join(root, 'dist'), now = new Date() } = {}) {
-  if (contentRepository && !repoPattern.test(contentRepository)) throw new Error('Ungültiges Inhaltsrepository.');
+export async function buildPages({ contentDir, out = join(root, 'dist'), now = new Date() } = {}) {
   const today = dateKey(now);
   const novemberTest = pagesMode(now) === 'november';
   const doors = [];
@@ -132,10 +130,7 @@ export async function buildPages({ contentDir, contentRepository, out = join(roo
 
   const source = join(root, 'public');
   const html = (await readFile(join(source, 'index.html'), 'utf8'))
-    .replace('<body>', '<body data-calendar-mode="pages">')
-    .replace('id="manage-calendar" href="/admin"', contentRepository
-      ? `id="manage-calendar" href="https://github.com/${contentRepository}"`
-      : 'id="manage-calendar" hidden');
+    .replace('<body>', '<body data-calendar-mode="pages">');
 
   await rm(out, { recursive: true, force: true });
   await mkdir(join(out, 'assets'), { recursive: true });
@@ -151,7 +146,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   try {
     const count = await buildPages({
       contentDir: process.env.ADVENT_CONTENT_DIR,
-      contentRepository: process.env.ADVENT_CONTENT_REPO,
     });
     console.log(`GitHub Pages liegt in dist/. ${count} Türchen sind veröffentlicht.`);
   } catch (error) {

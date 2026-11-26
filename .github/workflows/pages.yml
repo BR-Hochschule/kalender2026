@@ -75,7 +75,6 @@ jobs:
       - name: Kalender bauen
         env:
           ADVENT_CONTENT_DIR: private-content
-          ADVENT_CONTENT_REPO: ${{ vars.CONTENT_REPOSITORY }}
         run: npm run build:pages
 
       - name: Ausschließlich die öffentliche Website bereitstellen
