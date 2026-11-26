@@ -19,6 +19,7 @@ const publicFiles = [
   'assets/instrument-serif-OFL.txt',
 ];
 const maxImageSize = 8 * 1024 * 1024;
+const maxDoorSize = 128 * 1024;
 const imageTypes = new Map([['.png', 'image/png'], ['.jpg', 'image/jpeg'], ['.jpeg', 'image/jpeg'], ['.webp', 'image/webp']]);
 
 function dateKey(date) {
@@ -58,6 +59,29 @@ async function regularFile(directory, name) {
   } catch (error) {
     if (error.code === 'ENOENT') return null;
     throw error;
+  }
+}
+
+async function readJson(directory, name, maxSize) {
+  const file = await regularFile(directory, name);
+  if (!file) return undefined;
+  if (file.size > maxSize) throw new Error('Die JSON-Datei ist zu groß.');
+  try { return JSON.parse(await readFile(file.path, 'utf8')); }
+  catch { throw new Error('Die JSON-Datei konnte nicht gelesen werden.'); }
+}
+
+async function readCalendarContent(contentDir) {
+  try {
+    const entries = await readJson(contentDir, 'tuerchen.json', 24 * maxDoorSize);
+    if (entries === undefined) return undefined;
+    if (!entries || typeof entries !== 'object' || Array.isArray(entries) ||
+        Object.keys(entries).some(day => !/^(?:[1-9]|1[0-9]|2[0-4])$/.test(day))) {
+      throw new Error('Erwartet wird ein JSON-Objekt mit Türchennummern von 1 bis 24.');
+    }
+    return entries;
+  } catch (error) {
+    const message = error.code ? 'Die Datei konnte nicht gelesen werden.' : error.message;
+    throw new Error(`tuerchen.json. ${message}`);
   }
 }
 
@@ -115,14 +139,12 @@ async function readImage(contentDir, day, value = '') {
   return { path: `media/${day}-${digest}${extension}`, bytes };
 }
 
-async function readDoor(contentDir, day, number) {
+async function readDoor(contentDir, day, number, entries) {
   try {
-    const file = await regularFile(join(contentDir, 'tueren'), `${number}.json`);
-    if (!file) return null;
-    if (file.size > 128 * 1024) throw new Error('Die JSON-Datei ist zu groß.');
-    let entry;
-    try { entry = JSON.parse(await readFile(file.path, 'utf8')); }
-    catch { throw new Error('Die JSON-Datei konnte nicht gelesen werden.'); }
+    const entry = entries === undefined
+      ? await readJson(join(contentDir, 'tueren'), `${number}.json`, maxDoorSize)
+      : entries[day];
+    if (entry === undefined) return null;
     if (!entry || typeof entry.freigeben !== 'boolean') throw new Error('Das Feld „freigeben“ muss true oder false sein.');
     if (!entry.freigeben) return null;
     const title = cleanText(entry.titel, 160, 'Titel');
@@ -141,7 +163,9 @@ async function readDoor(contentDir, day, number) {
 
 export async function buildPages({ contentDir, out = join(root, 'dist'), now = new Date() } = {}) {
   const today = dateKey(now);
-  const novemberTest = pagesMode(now) === 'november';
+  const mode = pagesMode(now);
+  const novemberTest = mode === 'november';
+  const entries = contentDir && mode === 'advent' ? await readCalendarContent(contentDir) : undefined;
   const doors = [];
   const images = [];
   for (let day = 1; day <= 24; day++) {
@@ -150,7 +174,7 @@ export async function buildPages({ contentDir, out = join(root, 'dist'), now = n
       continue;
     }
     const number = String(day).padStart(2, '0');
-    const released = contentDir && today >= `${year}-12-${number}` ? await readDoor(contentDir, day, number) : null;
+    const released = contentDir && today >= `${year}-12-${number}` ? await readDoor(contentDir, day, number, entries) : null;
     if (released?.image) images.push(released.image);
     doors.push(released ? { day, available: true, content: released.content } : { day, available: false });
   }

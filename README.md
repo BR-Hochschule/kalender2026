@@ -16,7 +16,7 @@ Schneefall und Tagesbeleuchtung starten beim Laden. Die Beleuchtung wechselt auc
 
 ## Einmalige Einrichtung auf GitHub
 
-1. Unter eurem GitHub-Konto ein separates **privates** Repository anlegen, etwa `BR-Hochschule/kalender2026-inhalte`. Die entpackte Inhaltsvorlage dort hochladen. Die Dateien `tueren/01.json` bis `tueren/24.json` liegen direkt im Unterordner `tueren/`. Bilder kommen in `bilder/`.
+1. Unter eurem GitHub-Konto ein separates **privates** Repository anlegen, etwa `BR-Hochschule/kalender2026-inhalte`. Die entpackte Inhaltsvorlage dort hochladen. `tuerchen.json` liegt direkt im Repository und enthält die Texte und Links aller Türchen. Bilder kommen in den Ordner `bilder/`.
 2. Einen **Fine-grained personal access token** für genau das private Inhaltsrepository erstellen. Unter **Repository permissions → Contents** genügt **Read-only**. Als **Resource owner** das Konto wählen, zu dem das Inhaltsrepository gehört. [GitHub-Anleitung für Zugriffstoken](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
 3. Im öffentlichen Repository `kalender2026` unter **Settings → Secrets and variables → Actions** den Token als Repository-Secret `CONTENT_READ_TOKEN` hinterlegen. Unter **Variables** die Repository-Variable `CONTENT_REPOSITORY` mit `BR-Hochschule/kalender2026-inhalte` anlegen. Bei einem anderen Namen entsprechend `Konto/Repository` eintragen. [Actions-Einstellungen öffnen](https://github.com/BR-Hochschule/kalender2026/settings/secrets/actions)
 4. Im öffentlichen Repository unter **Settings → Pages** die Quelle **GitHub Actions** auswählen. [Pages-Einstellungen öffnen](https://github.com/BR-Hochschule/kalender2026/settings/pages)
@@ -26,31 +26,36 @@ Schneefall und Tagesbeleuchtung starten beim Laden. Die Beleuchtung wechselt auc
 
 ## Türchen bearbeiten
 
-Im privaten Repository die Datei für den Tag öffnen und über das Stiftsymbol bearbeiten. `tueren/06.json` ist zum Beispiel der 6. Dezember. Eine Datei kann so aussehen:
+Im privaten Repository `tuerchen.json` öffnen und über das Stiftsymbol bearbeiten. Die Nummer identifiziert das Türchen. `"6"` steht für den 6. Dezember:
 
 ```json
 {
-  "titel": "Ein Gruß zum Nikolaus",
-  "text": "Wir wünschen euch einen schönen Nikolaustag!\n\nViel Spaß mit der heutigen Überraschung.",
-  "bildbeschreibung": "Lebkuchen-Nikolaus auf einem roten Teller",
-  "links": [
-    { "titel": "Unser Keksrezept", "url": "https://example.org/keksrezept" }
-  ],
-  "freigeben": true
+  "6": {
+    "titel": "Ein Gruß zum Nikolaus",
+    "text": "Wir wünschen euch einen schönen Nikolaustag!\n\nViel Spaß mit der heutigen Überraschung.",
+    "bildbeschreibung": "Lebkuchen-Nikolaus auf einem roten Teller",
+    "links": [
+      { "titel": "Unser Keksrezept", "url": "https://example.org/keksrezept" }
+    ],
+    "freigeben": true
+  }
 }
 ```
 
 - Bei `"freigeben": false` bleibt das Türchen ein Entwurf. Bei `true` ist es ab seinem Dezembertag für die Veröffentlichung vorgesehen.
+- Weitere Türchen mit ihrer Nummer von `"1"` bis `"24"` ergänzen. Fehlende Nummern bleiben geschlossen.
 - Für mehrzeilige Texte in der Datei `\n` verwenden. Ohne Links `"links": []` verwenden.
 - Die Änderung mit **Commit changes** speichern. Falls ein bereits fälliges Türchen sofort aktualisiert werden soll, im öffentlichen Repository den Workflow erneut starten. Fehlerhafte Dateien meldet der Workflow mit der betroffenen Türchennummer. Bis zum nächsten erfolgreichen Lauf bleibt die letzte Veröffentlichung online.
+
+Beim Wechsel von einzelnen Dateien im Ordner `tueren/` die vorhandenen Einträge gesammelt in `tuerchen.json` übernehmen. Sobald die gemeinsame Datei vorliegt, gelten ihre Einträge für alle Tage. Bis dahin verwendet der Kalender die Einzeldateien.
 
 ### Bilder direkt auf GitHub hochladen
 
 Im privaten Inhaltsrepository den Ordner `bilder/` öffnen und **Add file → Upload files** wählen. Der Dateiname ordnet das Foto zu. `1.png` gehört zu Türchen 1, `6.jpg` zu Türchen 6 und `24.webp` zu Türchen 24. Unterstützt werden PNG, JPG, JPEG und WebP bis 8 MiB. Namen mit führender Null wie `01.jpg` funktionieren ebenfalls.
 
-Das Foto erscheint bei der nächsten Veröffentlichung in seinem Türchen, sobald dessen Dezembertag erreicht ist und die Inhaltsdatei freigegeben wurde. In `bildbeschreibung` lässt sich ein Alternativtext für das Foto hinterlegen. Wenn bereits ein fester Dateiname im Feld `bild` steht, hat er Vorrang. Bei mehreren nummerierten Bildern sucht der Kalender zuerst ohne führende Null und dann in der Reihenfolge PNG, JPG, JPEG und WebP.
+Das Foto erscheint bei der nächsten Veröffentlichung in seinem Türchen, sobald dessen Dezembertag erreicht ist und der Eintrag freigegeben wurde. In `bildbeschreibung` lässt sich ein Alternativtext für das Foto hinterlegen. Wenn bereits ein fester Dateiname im Feld `bild` steht, hat er Vorrang. Bei mehreren nummerierten Bildern sucht der Kalender zuerst ohne führende Null und dann in der Reihenfolge PNG, JPG, JPEG und WebP.
 
-Die Anleitung im privaten Inhalts-Paket beschreibt auch den optionalen automatischen Start der Veröffentlichung bei Änderungen in `bilder/` oder `tueren/`.
+Die Anleitung im privaten Inhalts-Paket beschreibt auch den optionalen automatischen Start der Veröffentlichung bei Änderungen in `bilder/` oder `tuerchen.json`.
 
 ## Lokal prüfen
 

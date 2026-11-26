@@ -86,6 +86,48 @@ test('schaltet im November alle Beispiele frei und wechselt am 1. Dezember zurü
   assert.deepEqual(december.doors[23], { day: 24, available: false });
 });
 
+test('veröffentlicht Texte, Links und nummerierte Bilder aus der gemeinsamen JSON-Datei nach Datum', async t => {
+  const { build, content, door, out } = await fixture(t);
+  const photo = await readFile(new URL('../public/assets/campus-advent-2026.webp', import.meta.url));
+  await writeFile(join(content, 'bilder', '1.webp'), photo);
+  await writeFile(join(content, 'bilder', '2.webp'), photo);
+  await door('01', { text: 'Frühere Fassung' });
+  await door('04', { text: 'Alt-Eintrag für Tag 4' });
+  const links = [{ titel: 'Intranet-Link', url: 'https://example.com/advent?tag=1&modus=lesen' }];
+  await writeFile(join(content, 'tuerchen.json'), JSON.stringify({
+    1: { titel: 'Willkommen', text: 'Erster Adventsgruß', links, bildbeschreibung: 'Verschneiter Campus', freigeben: true },
+    2: { titel: 'Zweiter Tag', text: 'Geheimer zweiter Gruß', freigeben: true },
+    3: { titel: 'Entwurf', text: 'Privater Entwurf', freigeben: false },
+  }));
+
+  const preview = await build('2026-11-30T22:59:59Z');
+  assert.doesNotMatch(JSON.stringify(preview), /Erster Adventsgruß|modus=lesen/);
+  assert.ok(!(await readdir(out)).includes('media'));
+
+  const first = await build('2026-11-30T23:00:00Z');
+  assert.equal(first.doors[0].content.text, 'Erster Adventsgruß');
+  assert.equal(first.doors[0].content.imageAlt, 'Verschneiter Campus');
+  assert.deepEqual(first.doors[0].content.links, [{ label: 'Intranet-Link', url: links[0].url }]);
+  assert.match(first.doors[0].content.imageUrl, /^\.\/media\/01-/);
+  assert.equal((await readdir(join(out, 'media'))).length, 1);
+  assert.deepEqual(first.doors[1], { day: 2, available: false });
+  assert.doesNotMatch(JSON.stringify(first), /Geheimer zweiter Gruß/);
+
+  const fourth = await build('2026-12-04T12:00:00Z');
+  assert.deepEqual(fourth.doors.filter(item => item.available).map(item => item.day), [1, 2]);
+  assert.doesNotMatch(JSON.stringify(fourth), /Privater Entwurf|Alt-Eintrag für Tag 4/);
+});
+
+test('meldet ungültige gemeinsame JSON-Dateien ohne private Inhalte auszugeben', async t => {
+  const { build, content } = await fixture(t);
+  await writeFile(join(content, 'tuerchen.json'), 'ungültig mit privaten Angaben');
+  const preview = await build('2026-11-30T22:59:59Z');
+  assert.equal(preview.novemberTest, true);
+  await assert.rejects(build('2026-12-01T08:00:00Z'), /tuerchen\.json\. Die JSON-Datei konnte nicht gelesen werden/);
+  await writeFile(join(content, 'tuerchen.json'), '{"25":{}}');
+  await assert.rejects(build('2026-12-01T08:00:00Z'), /tuerchen\.json.*Türchennummern von 1 bis 24/);
+});
+
 test('verhindert das Kopieren von Bildpfaden außerhalb des privaten Bilderordners', async t => {
   const { content, door, build } = await fixture(t);
   await writeFile(join(content, 'geheim.png'), 'nicht veröffentlichen');
