@@ -121,7 +121,7 @@ svg {
 .snow-motion { flex: 1 0 100%; color: var(--secondary); gap: .5rem .75rem; }
 .snow-motion span { font-size: .875rem; }
 
-.snow-toggle, .snow-motion button, .preview-badge {
+.snow-toggle, .snow-motion button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -136,8 +136,7 @@ svg {
   line-height: 1.25;
 }
 
-.preview-badge { color: #f3d8ac; text-decoration: none; }
-.preview-badge:hover, .snow-toggle:hover, .snow-motion button:hover { background: #30475e; }
+.snow-toggle:hover, .snow-motion button:hover { background: #30475e; }
 
 .snow-motion button[aria-pressed="true"] {
   border-color: var(--brass);
@@ -310,13 +309,13 @@ h1 em { color: #f4d29d; font-weight: 400; }
 
 .board-header { margin-block-end: 1rem; }
 
-.board-header h2, .preview-panel h2 {
+.board-header h2 {
   margin: 0;
   color: #fff7e7;
   font: 400 clamp(1.35rem, 2.6vw, 1.85rem)/1.14 var(--serif);
 }
 
-.board-header p, .preview-panel p {
+.board-header p {
   margin: .32rem 0 0;
   color: var(--secondary);
   font-size: .875rem;
@@ -541,69 +540,6 @@ h1 em { color: #f4d29d; font-weight: 400; }
   pointer-events: none;
 }
 
-.calendar-shell:has(.preview-panel:not([hidden])) .winter-scene { border-end-start-radius: 0; border-end-end-radius: 0; }
-
-.preview-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: .85rem 1.25rem;
-  padding: 1.1rem clamp(.8rem, 2vw, 1.4rem);
-  border-block-start: 1px solid #778790;
-  border-radius: 0 0 .95rem .95rem;
-  background: #172534;
-}
-
-.preview-panel h2 { font-size: 1.2rem; }
-.preview-panel p { font-size: .8125rem; }
-
-.preview-actions, .phase-controls, .preview-day-control {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  min-inline-size: 0;
-  gap: .5rem;
-  font-size: .875rem;
-}
-
-.preview-actions { gap: .75rem 1rem; }
-
-.phase-controls button, .preview-day-control select {
-  min-block-size: 2.75rem;
-  min-inline-size: 2.75rem;
-  padding: .45rem .57rem;
-  border: 1px solid #72899c;
-  border-radius: .38rem;
-  background: #1e3143;
-  color: #fff7e7;
-}
-
-.phase-controls button:hover, .preview-day-control select:hover { background: #344f65; }
-
-.phase-controls button[aria-pressed="true"] {
-  border-color: #ffe2b1;
-  background: #f0d2a0;
-  color: #241a10;
-  font-weight: 700;
-}
-
-.preview-day-control select {
-  appearance: none;
-  padding-inline-end: 1.7rem;
-  background-image: linear-gradient(45deg, transparent 50%, #e7edf0 50%), linear-gradient(135deg, #e7edf0 50%, transparent 50%);
-  background-size: .3rem .3rem, .3rem .3rem;
-  background-position: right .88rem center, right .59rem center;
-  background-repeat: no-repeat;
-}
-
-#live-mode {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: 2.75rem;
-  color: #f1d8ad;
-}
-
 .site-footer {
   display: flex;
   align-items: center;
@@ -796,7 +732,7 @@ h1 em { color: #f4d29d; font-weight: 400; }
 
 @media (forced-colors: active) {
   .calendar-door { border-color: ButtonText; }
-  .calendar-door.is-today, .phase-controls button[aria-pressed="true"] { border: 2px solid Highlight; }
+  .calendar-door.is-today { border: 2px solid Highlight; }
   :is(a, button, select, [tabindex]):focus-visible { outline-color: Highlight; }
   .toggle-track::after { background: ButtonText; }
 }

@@ -7,8 +7,8 @@
   <meta name="description" content="Der Betriebsratskalender 2026 der Hochschule Campus Wien mit 24 Türchen für die Adventzeit.">
   <title>Betriebsratskalender 2026 · Hochschule Campus Wien</title>
   <link rel="icon" href="./assets/stern.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./calendar.css?v=advent-2026-4">
-  <script src="./calendar.js?v=advent-2026-5" defer></script>
+  <link rel="stylesheet" href="./calendar.css?v=advent-2026-6">
+  <script src="./calendar.js?v=advent-2026-6" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#hauptinhalt">Zum Hauptinhalt</a>
@@ -26,7 +26,6 @@
       <span><strong>Betriebsrat</strong><small>Hochschule Campus Wien</small></span>
     </a>
     <div class="masthead-actions">
-      <a class="preview-badge" id="preview-badge" href="#preview-date" hidden>Vorschau</a>
       <button class="snow-toggle" id="snow-toggle" type="button" aria-pressed="true">
         <svg aria-hidden="true"><use href="#i-snow"/></svg><span>Schnee</span><span class="toggle-track" aria-hidden="true"></span>
       </button>
@@ -68,35 +67,12 @@
                 <span><strong id="opened-count">0</strong> von 24 geöffnet</span>
                 <span class="progress-track" aria-hidden="true"><span id="progress-fill"></span></span>
               </div>
-              <span class="door-legend"><svg aria-hidden="true"><use href="#i-lock"/></svg> <span id="door-legend">Öffnet am jeweiligen Dezembertag</span></span>
+              <span class="door-legend" id="door-legend"><svg aria-hidden="true"><use href="#i-lock"/></svg> Öffnet am jeweiligen Dezembertag</span>
             </div>
           </section>
         </div>
         <canvas id="snow-canvas" aria-hidden="true"></canvas>
       </div>
-
-      <section class="preview-panel" id="preview-date" aria-labelledby="preview-heading" hidden>
-        <div>
-          <h2 id="preview-heading">Vorschau einstellen</h2>
-          <p id="phase-description">Licht nach Tageszeit</p>
-        </div>
-        <div class="preview-actions">
-          <div class="phase-controls" id="phase-controls" hidden role="group" aria-label="Tagesstimmung für die Vorschau">
-            <button type="button" data-phase="auto" aria-pressed="true" aria-label="Auto, aktuelle Tageszeit">Auto</button>
-            <button type="button" data-phase="morning" aria-pressed="false">Morgen</button>
-            <button type="button" data-phase="noon" aria-pressed="false">Mittag</button>
-            <button type="button" data-phase="afternoon" aria-pressed="false">Nachmittag</button>
-            <button type="button" data-phase="evening" aria-pressed="false">Abend</button>
-            <button type="button" data-phase="night" aria-pressed="false">Nacht</button>
-          </div>
-          <div class="preview-day-control" id="preview-day-control">
-            <label for="preview-day">Probetag</label>
-            <select id="preview-day"></select>
-            <span>Dezember</span>
-          </div>
-          <a id="live-mode" href="./">Echtzeit ansehen</a>
-        </div>
-      </section>
     </section>
   </main>
 

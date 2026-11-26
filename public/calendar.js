@@ -6,15 +6,13 @@
   const dialog = $('door-dialog');
   const todayDoor = $('today-door');
   const calendarMessage = $('calendar-message');
-  const phaseButtons = $('phase-controls').querySelectorAll('button[type="button"][data-phase]');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const phaseNames = { morning: 'Ein leiser Wintermorgen', noon: 'Ein heller Wintermittag', afternoon: 'Ein goldener Winternachmittag', evening: 'Ein gemütlicher Winterabend', night: 'Eine stille Winternacht' };
   const doorOrder = [7, 18, 2, 15, 9, 23, 12, 4, 21, 6, 17, 10, 1, 14, 8, 24, 3, 20, 16, 5, 22, 11, 19, 13];
   const doorButtons = new Map();
   const formatDay = day => String(day).padStart(2, '0');
   const pages = document.body.dataset.calendarMode === 'pages';
   const requestedPreview = !pages && new URLSearchParams(location.search).get('preview') === '1';
-  const state = { calendar: null, preview: false, previewDay: 12, phase: 'auto', opened: new Set(), snow: true, snowMotionOptIn: false, serverOffset: 0, opening: false, weather: null };
+  const state = { calendar: null, opened: new Set(), snow: true, snowMotionOptIn: false, serverOffset: 0, opening: false, weather: null };
   const canAnimateSnow = () => !reducedMotion.matches || state.snowMotionOptIn;
   let phaseTimer, activeDoor;
   function readLocal(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
@@ -54,9 +52,7 @@
     return year === state.calendar.year && month === 11;
   }
   function canOpen(day, novemberTest = isNovemberTest()) {
-    return Boolean(doorMetadata(day)?.available) &&
-      (!state.calendar.novemberTest || novemberTest) &&
-      (!state.preview || day <= state.previewDay);
+    return Boolean(doorMetadata(day)?.available) && (!state.calendar.novemberTest || novemberTest);
   }
   function openedStorageKey(calendar) {
     if (!calendar) return null;
@@ -64,27 +60,19 @@
     if (calendar.novemberTest) return `${key}-november-test`;
     return calendar.preview ? `${key}-preview` : key;
   }
-  function chooseAutoPhase() {
-    const hour = serverDateParts().hour;
+  function phaseForHour(hour) {
     if (hour >= 6 && hour < 11) return 'morning';
     if (hour >= 11 && hour < 14) return 'noon';
     if (hour >= 14 && hour < 17) return 'afternoon';
     if (hour >= 17 && hour < 22) return 'evening';
     return 'night';
   }
-  function applyPhase(phase) {
+  function updateLighting() {
     clearTimeout(phaseTimer);
-    state.phase = phase;
-    const applied = phase === 'auto' ? chooseAutoPhase() : phase;
-    if (scene.dataset.phase !== applied) scene.dataset.phase = applied;
-    setText($('phase-description'), phaseNames[applied]);
-    phaseButtons.forEach(button => {
-      button.setAttribute('aria-pressed', String(button.dataset.phase === phase));
-    });
-    if (phase === 'auto') {
-      const untilNextMinute = 60_000 - (Date.now() + state.serverOffset) % 60_000;
-      phaseTimer = setTimeout(() => applyPhase('auto'), untilNextMinute + 50);
-    }
+    const phase = phaseForHour(serverDateParts().hour);
+    if (scene.dataset.phase !== phase) scene.dataset.phase = phase;
+    const untilNextMinute = 60_000 - (Date.now() + state.serverOffset) % 60_000;
+    phaseTimer = setTimeout(updateLighting, untilNextMinute + 50);
   }
   function makeDoor(day) {
     const button = document.createElement('button');
@@ -116,20 +104,10 @@
     const date = serverDateParts();
     const year = state.calendar.year;
     const novemberTest = isNovemberTest(date);
-    const showPreview = state.preview || novemberTest;
-    const beforeAdvent = !showPreview && (date.year < year || (date.year === year && date.month < 12));
+    const beforeAdvent = !state.calendar.preview && (date.year < year || (date.year === year && date.month < 12));
     const isAdventDay = date.year === year && date.month === 12 && date.day <= 24;
-    let today = isAdventDay ? date.day : null;
-    if (state.preview) today = state.previewDay;
+    const today = isAdventDay ? date.day : null;
     const todayAvailable = today !== null && canOpen(today, novemberTest);
-
-    setText($('preview-badge'), novemberTest ? 'November-Test' : 'Vorschau');
-    $('preview-badge').hidden = !showPreview;
-    $('phase-controls').hidden = !showPreview;
-    $('preview-date').hidden = !showPreview;
-    $('preview-day-control').hidden = !state.preview;
-    $('live-mode').hidden = !state.preview;
-    if (!showPreview && state.phase !== 'auto') applyPhase('auto');
 
     for (const [day, button] of doorButtons) {
       const available = canOpen(day, novemberTest);
@@ -148,7 +126,7 @@
       } else {
         const meta = doorMetadata(day);
         const future = beforeAdvent || (today !== null && day > today);
-        const scheduled = future && (pages || (state.preview ? meta?.available : meta?.published));
+        const scheduled = future && (pages || meta?.published);
         const closedLabel = `${label} – ${scheduled ? `ab ${day}. Dezember` : 'derzeit nicht verfügbar'}`;
         button.setAttribute('aria-label', closedLabel);
         button.removeAttribute('aria-haspopup');
@@ -159,16 +137,15 @@
     }
 
     let message = 'Alle verfügbaren Türchen bleiben zugänglich.';
-    if (novemberTest) message = 'Alle 24 Türchen sind mit Beispielinhalten zum Testen geöffnet.';
+    if (novemberTest) message = 'Alle 24 Türchen sind verfügbar.';
     else if (beforeAdvent) message = 'Advent startet am 1. Dezember.';
-    else if (state.calendar.novemberTest) message = 'Die November-Vorschau ist beendet. Der Adventkalender wird bereitgestellt.';
+    else if (state.calendar.novemberTest) message = 'Die Advent-Türchen werden gerade bereitgestellt.';
     else if (today !== null) {
       if (!todayAvailable) message = `Türchen ${formatDay(today)} ist derzeit nicht verfügbar.`;
-      else if (state.preview) message = `Vorschau für den ${today}. Dezember.`;
       else message = `Heute öffnet Türchen ${formatDay(today)}.`;
     }
     setText(calendarMessage, message);
-    setText($('door-legend'), novemberTest ? 'Alle Türchen frei zum Ausprobieren' : 'Öffnet am jeweiligen Dezembertag');
+    $('door-legend').hidden = novemberTest || state.calendar.preview;
     if (todayAvailable) {
       todayDoor.dataset.day = String(today);
       setText(todayDoor, `Türchen ${formatDay(today)} öffnen`);
@@ -185,7 +162,7 @@
   }
   function renderDoor(data) {
     $('dialog-day').textContent = formatDay(data.day);
-    $('dialog-eyebrow').textContent = `DEIN ${data.day}. TÜRCHEN${state.preview || isNovemberTest() ? ' · VORSCHAU' : ''}`;
+    $('dialog-eyebrow').textContent = `DEIN ${data.day}. TÜRCHEN`;
     $('dialog-title').textContent = data.title || 'Ein kleiner Lichtblick';
     $('dialog-text').textContent = data.text || '';
     const contentImage = $('dialog-image');
@@ -227,7 +204,7 @@
     try {
       const data = pages
         ? doorMetadata(day).content
-        : await api(`/api/doors/${day}${state.preview ? '?preview=1' : ''}`);
+        : await api(`/api/doors/${day}${state.calendar.preview ? '?preview=1' : ''}`);
       const animate = !reducedMotion.matches;
       if (animate) tile.classList.add('is-opening');
       state.weather?.burst();
@@ -561,17 +538,14 @@
     state.snow = enabled;
     if (!enabled) state.snowMotionOptIn = false;
     $('snow-toggle').setAttribute('aria-pressed', String(enabled));
-    writeLocal('advent-snow', enabled);
     syncSnowMotionControl();
     state.weather?.setEnabled();
   }
   async function loadCalendar() {
-    const firstLoad = !state.calendar;
     const previousStorageKey = openedStorageKey(state.calendar);
     const data = await api(pages ? './calendar.json' : `/api/calendar${requestedPreview ? '?preview=1' : ''}`);
     state.calendar = data;
     state.serverOffset = pages ? 0 : new Date(data.serverNow).getTime() - Date.now();
-    state.preview = Boolean(data.preview);
     const storageKey = openedStorageKey(data);
     if (previousStorageKey !== storageKey) {
       const storedOpened = readLocal(storageKey, []);
@@ -579,8 +553,7 @@
     }
     $('error-message').hidden = true;
     syncDoors();
-    applyPhase(state.preview || isNovemberTest() ? state.phase : 'auto');
-    if (firstLoad) toast(requestedPreview && !state.preview ? 'Die Vorschau ist nur lokal oder nach Anmeldung in der Verwaltung verfügbar.' : '');
+    updateLighting();
   }
   async function refreshCalendar() {
     try { await loadCalendar(); }
@@ -599,7 +572,7 @@
     }
   }
   function init() {
-    applyPhase('auto');
+    updateLighting();
     buildDoors();
     todayDoor.hidden = true;
     todayDoor.setAttribute('aria-haspopup', 'dialog');
@@ -607,26 +580,6 @@
       if (!todayDoor.hidden) openDoor(Number(todayDoor.dataset.day), todayDoor);
     });
 
-    const previewSelect = $('preview-day');
-    const options = [];
-    for (let i = 1; i <= 24; i++) {
-      const option = document.createElement('option');
-      option.value = String(i);
-      option.textContent = formatDay(i);
-      options.push(option);
-    }
-    const storedDay = Number(readLocal('advent-preview-day', state.previewDay));
-    if (Number.isInteger(storedDay) && storedDay >= 1 && storedDay <= 24) state.previewDay = storedDay;
-    previewSelect.replaceChildren(...options);
-    previewSelect.value = String(state.previewDay);
-    previewSelect.addEventListener('change', () => {
-      if (!state.preview) return;
-      state.previewDay = Number(previewSelect.value);
-      writeLocal('advent-preview-day', state.previewDay);
-      syncDoors();
-      toast('');
-    });
-    phaseButtons.forEach(button => button.addEventListener('click', () => applyPhase(button.dataset.phase)));
     $('snow-toggle').addEventListener('click', () => setSnow(!state.snow));
     $('snow-motion-toggle').addEventListener('click', () => {
       state.snowMotionOptIn = !state.snowMotionOptIn;
@@ -649,9 +602,9 @@
       returnFocus.focus();
       if (announcement) toast(announcement);
     });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && state.phase === 'auto') applyPhase('auto'); });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) updateLighting(); });
     dialog.addEventListener('click', event => { if (event.target === dialog) { const rect = dialog.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close(); } });
-    setSnow(readLocal('advent-snow', true) !== false);
+    syncSnowMotionControl();
     state.weather = createSnow();
     const photo = $('scene-world').querySelector('img');
     if (photo) {

@@ -6,11 +6,13 @@ Die Redaktion arbeitet im privaten GitHub-Repository. GitHub Actions stellt den 
 
 ## Im November testen
 
-Im November 2026 öffnet der Kalender alle 24 Türchen mit Beispielinhalten. Türchen 10 enthält einen Link, Türchen 11 ein Bild. Die Lichtstimmungen lassen sich im Testmodus auswählen. Der Testfortschritt wird getrennt vom Dezember gespeichert.
+Im November 2026 öffnet der Kalender alle 24 Türchen mit Beispielinhalten. Türchen 10 enthält einen Link, Türchen 11 ein Bild. Der Fortschritt im November wird getrennt vom Dezember gespeichert.
 
 Für die November-Version auf GitHub reicht es, den Code zu übertragen, unter **Settings → Pages** die Quelle **GitHub Actions** zu wählen und unter **Actions → Adventkalender veröffentlichen → Run workflow** zu starten. Das private Inhaltsrepository wird erst für den Advent benötigt.
 
 Am 1. Dezember um Mitternacht endet die Vorschau in der Zeitzone Europe/Berlin. Auch eine noch zwischengespeicherte November-Seite sperrt dann die Beispieltürchen. Sobald GitHub die Advent-Version bereitstellt, öffnen sich die veröffentlichten Türchen nach Datum.
+
+Schneefall und Tagesbeleuchtung starten beim Laden. Die Beleuchtung wechselt auch bei offenem Kalender automatisch. Der Schneeschalter gilt für die aktuelle Ansicht. Bei der Systemeinstellung für reduzierte Bewegung bleibt der Schnee zunächst ruhig und lässt sich bei Bedarf animieren.
 
 ## Einmalige Einrichtung auf GitHub
 
@@ -19,6 +21,8 @@ Am 1. Dezember um Mitternacht endet die Vorschau in der Zeitzone Europe/Berlin. 
 3. Im öffentlichen Repository `klender2026` unter **Settings → Secrets and variables → Actions** den Token als Repository-Secret `CONTENT_READ_TOKEN` hinterlegen. Unter **Variables** die Repository-Variable `CONTENT_REPOSITORY` mit `BR-Hochschule/klender2026-inhalte` anlegen. Bei einem anderen Namen entsprechend `Konto/Repository` eintragen. [Actions-Einstellungen öffnen](https://github.com/BR-Hochschule/klender2026/settings/secrets/actions)
 4. Im öffentlichen Repository unter **Settings → Pages** die Quelle **GitHub Actions** auswählen. [Pages-Einstellungen öffnen](https://github.com/BR-Hochschule/klender2026/settings/pages)
 5. Unter **Actions → Adventkalender veröffentlichen → Run workflow** den ersten Lauf auf `main` starten. Bei erfolgreichem Lauf steht die Website unter [br-hochschule.github.io/klender2026](https://br-hochschule.github.io/klender2026/).
+
+Änderungen am Kalendercode, die nach `main` hochgeladen werden, lösen sofort einen neuen Veröffentlichungs-Lauf aus.
 
 ## Türchen bearbeiten
 
@@ -56,4 +60,4 @@ python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
 
 Anschließend [lokalen Pages-Build ansehen](http://127.0.0.1:4173/). Im November sind die Beispieltürchen sofort verfügbar. Für einen lokalen Advent-Build verwendet `ADVENT_CONTENT_DIR=private-content npm run build:pages` den entpackten privaten Inhaltsordner und prüft das aktuelle Datum. `dist/` wird bei jedem Build neu erstellt.
 
-Für die vorhandene lokale Vorschau mit einstellbarem Probetag und Beispielinhalten steht weiterhin `npm run preview` zur Verfügung. Ihr zufällig erzeugtes Verwaltungspasswort liegt in `data/ADMIN-ZUGANG.txt`. Die lokale Vorschau, der Node-Server und die SQLite-Datenbank sind von der Pages-Veröffentlichung getrennt.
+Der lokale Node-Server mit Verwaltung lässt sich weiterhin mit `npm run preview` starten. Sein zufällig erzeugtes Verwaltungspasswort liegt in `data/ADMIN-ZUGANG.txt`. Der Node-Server und die SQLite-Datenbank sind von der Pages-Veröffentlichung getrennt.
