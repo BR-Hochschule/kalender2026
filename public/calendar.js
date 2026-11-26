@@ -567,7 +567,6 @@
       }
       if (state.calendar?.novemberTest) syncDoors();
     } finally {
-      $('scene-loading').hidden = true;
       setTimeout(refreshCalendar, 60_000);
     }
   }

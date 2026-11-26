@@ -9,7 +9,15 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const year = 2026;
 const timeZone = 'Europe/Berlin';
 const dateFormat = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' });
-const publicFiles = ['calendar.css', 'calendar.js', 'assets/campus-advent-2026.webp', 'assets/stern.svg'];
+const publicFiles = [
+  'calendar.css',
+  'calendar.js',
+  'assets/campus-advent-2026.webp',
+  'assets/stern.svg',
+  'assets/instrument-serif.woff2',
+  'assets/instrument-serif-italic.woff2',
+  'assets/instrument-serif-OFL.txt',
+];
 const maxImageSize = 8 * 1024 * 1024;
 const imageTypes = new Map([['.jpeg', 'image/jpeg'], ['.jpg', 'image/jpeg'], ['.png', 'image/png'], ['.webp', 'image/webp']]);
 
