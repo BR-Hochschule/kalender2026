@@ -87,6 +87,7 @@
     leaf.className = 'door-leaf';
     const frost = document.createElement('span');
     frost.className = 'door-frost';
+    frost.hidden = true;
     frost.setAttribute('aria-hidden', 'true');
     frost.append(icon('snow'), icon('snow'), icon('snow'));
     const number = document.createElement('span');
@@ -121,6 +122,7 @@
       button.classList.toggle('is-locked', !available);
       button.classList.toggle('is-open', available && opened);
       button.classList.toggle('is-today', isToday);
+      button.querySelector('.door-frost').hidden = opened;
       button.setAttribute('aria-disabled', String(!available));
       if (available) {
         button.setAttribute('aria-label', `${label}${opened ? ' erneut' : ''} öffnen`);
