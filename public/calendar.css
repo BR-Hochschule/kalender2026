@@ -275,15 +275,15 @@ h1 em { color: #f4d29d; font-weight: 400; }
 .today-door {
   min-block-size: 2.75rem;
   padding: .55rem .95rem;
-  border: 1px solid #ffe4b2;
+  border: 1px solid #e4f4ce;
   border-radius: .4rem;
-  background: #f0d2a0;
-  color: #241a10;
+  background: #c7e3a6;
+  color: #162e20;
   font-size: .875rem;
   font-weight: 700;
 }
 
-.today-door:hover { background: #ffe5b9; }
+.today-door:hover { background: #def0c5; }
 
 .calendar-status {
   margin: 0;
@@ -316,47 +316,43 @@ h1 em { color: #f4d29d; font-weight: 400; }
   min-block-size: 3.625rem;
   aspect-ratio: 1.45;
   padding: 0;
-  border: 1px solid #b5ae9e;
+  border: 1px solid #adcaad;
   border-radius: .48rem;
-  background: #162631;
+  background: #142e23;
   color: #fff4df;
-  --tile-top: #344b60;
-  --tile-bottom: #233649;
-  --trim: #cfb68979;
+  --tile-top: #2b6747;
+  --tile-bottom: #1a4231;
+  --trim: #b8d6a880;
 }
-
-.calendar-door:nth-child(4n + 2) { --tile-top: #503b47; --tile-bottom: #372733; }
-.calendar-door:nth-child(4n + 3) { --tile-top: #345246; --tile-bottom: #233b33; }
-.calendar-door:nth-child(4n + 4) { --tile-top: #474449; --tile-bottom: #303136; }
 
 .calendar-door.is-locked {
   cursor: not-allowed;
-  color: #d7e2ea;
-  border-color: #8499a9;
-  --tile-top: #283a4b;
-  --tile-bottom: #1d2e3e;
-  --trim: #7390a660;
+  color: #e1ede2;
+  border-color: #8dac95;
+  --tile-top: #274d3b;
+  --tile-bottom: #193628;
+  --trim: #a1c3a175;
 }
 
 .calendar-door.is-open {
   color: #e3f9ed;
   border-color: #a8c7b0;
-  --tile-top: #36594f;
-  --tile-bottom: #214339;
-  --trim: #b2d5b086;
+  --tile-top: #326e55;
+  --tile-bottom: #20503c;
+  --trim: #bce3b886;
 }
 
 .calendar-door.is-today {
-  border-color: #fff0c9;
-  color: #271e14;
-  box-shadow: inset 0 0 0 1px #fff0c9, 0 0 .85rem #dfba7377;
-  --tile-top: #f4dbab;
-  --tile-bottom: #d8ad6e;
-  --trim: #63482780;
+  border-color: #e4f4ce;
+  color: #162e20;
+  box-shadow: inset 0 0 0 1px #e4f4ce, 0 0 .85rem #abd78170;
+  --tile-top: #d0e8a5;
+  --tile-bottom: #96c574;
+  --trim: #315d377d;
 }
 
-.calendar-door.is-available:is(:hover, :focus-visible) { z-index: 1; border-color: #fff0c9; }
-.calendar-door.is-available:hover { box-shadow: 0 .3rem 1rem #05132080, 0 0 .7rem #ffe3af46; }
+.calendar-door.is-available:is(:hover, :focus-visible) { z-index: 1; border-color: #e4f4ce; }
+.calendar-door.is-available:hover { box-shadow: 0 .3rem 1rem #05132080, 0 0 .7rem #c1e4ac60; }
 .calendar-door:focus-visible { z-index: 2; }
 
 .door-inside, .door-leaf, .door-leaf::before, .door-leaf::after { position: absolute; }
@@ -366,7 +362,7 @@ h1 em { color: #f4d29d; font-weight: 400; }
   display: grid;
   place-items: center;
   color: #fff4d8;
-  background: radial-gradient(ellipse at 50% 45%, #bd8b52, #6a4931);
+  background: radial-gradient(ellipse at 50% 45%, #568e66, #1c4533);
 }
 
 .door-inside svg { inline-size: 1.6rem; block-size: 1.6rem; }
@@ -422,7 +418,7 @@ h1 em { color: #f4d29d; font-weight: 400; }
 .door-check, .door-lock { display: none; inline-size: .75rem; block-size: .75rem; }
 .is-open .door-check, .is-locked .door-lock { display: block; }
 .is-open .door-handle, .is-locked .door-handle { display: none; }
-.is-today .door-handle { color: #634621; }
+.is-today .door-handle { color: #315d37; }
 
 .calendar-door.is-opening .door-leaf::before { transform: translateX(-100%); }
 .calendar-door.is-opening .door-leaf::after { transform: translateX(100%); }
