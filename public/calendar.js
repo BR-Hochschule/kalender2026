@@ -225,12 +225,13 @@
         dialog.style.setProperty('--card-from-y', slideFrom(bounds.top + bounds.height / 2, window.innerHeight) + 'px');
       }
       dialog.showModal();
+      dialog.scrollTop = 0;
       const newlyOpened = !state.opened.has(day);
       state.opened.add(day);
       writeLocal(storageKey, [...state.opened]);
       activeDoor = { trigger, tile, announcement: newlyOpened ? `${state.opened.size} von 24 Türchen geöffnet.` : '' };
       syncDoors();
-      $('dialog-title').focus();
+      $('dialog-title').focus({ preventScroll: true });
     } catch (error) { toast(error.message); }
     finally {
       if (!dialog.open) tile.classList.remove('is-opening');

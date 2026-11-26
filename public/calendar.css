@@ -352,7 +352,10 @@ h1 em { color: #f4d29d; font-weight: 400; }
 .door-leaf::before, .door-leaf::after {
   inset-block: 0;
   inline-size: 50%;
-  background: linear-gradient(155deg, var(--tile-top), var(--tile-bottom));
+  background:
+    linear-gradient(var(--trim), var(--trim)) center 24% / 100% 1px no-repeat,
+    linear-gradient(var(--trim), var(--trim)) center 76% / 100% 1px no-repeat,
+    linear-gradient(155deg, var(--tile-top), var(--tile-bottom));
   content: "";
 }
 
@@ -411,7 +414,7 @@ h1 em { color: #f4d29d; font-weight: 400; }
   font-variant-numeric: tabular-nums;
 }
 
-.door-handle, .door-check, .door-lock {
+.door-check, .door-lock {
   position: absolute;
   z-index: 1;
   inset-inline-end: .37rem;
@@ -419,17 +422,21 @@ h1 em { color: #f4d29d; font-weight: 400; }
 }
 
 .door-handle {
-  inline-size: .24rem;
-  block-size: .24rem;
-  border-radius: 50%;
-  background: currentColor;
-  color: var(--brass);
+  position: absolute;
+  z-index: 1;
+  inset-inline-end: clamp(.24rem, .9vw, .62rem);
+  inset-block-start: 50%;
+  inline-size: .36rem;
+  block-size: .79rem;
+  transform: translateY(-50%);
+  border: 1px solid #694a23;
+  border-radius: .2rem;
+  background: linear-gradient(90deg, #916023, #f5da92 48%, #c8974a 75%, #795021);
+  box-shadow: 0 1px 2px #0a201b8c;
 }
 
 .door-check, .door-lock { display: none; inline-size: .75rem; block-size: .75rem; }
 .is-open .door-check, .is-locked .door-lock { display: block; }
-.is-open .door-handle, .is-locked .door-handle { display: none; }
-.is-today .door-handle { color: #315d37; }
 
 .calendar-door.is-opening .door-leaf {
   mask-image: radial-gradient(ellipse farthest-corner at center, transparent var(--frost-thaw, -8%), #000 calc(var(--frost-thaw, -8%) + 8%));
@@ -580,6 +587,17 @@ h1 em { color: #f4d29d; font-weight: 400; }
 }
 
 .dialog-layout { display: grid; grid-template-columns: minmax(0, 37%) minmax(0, 1fr); }
+
+.dialog-layout:has(.dialog-content-image:not([hidden])) { grid-template-columns: minmax(0, 1fr); }
+
+.dialog-visual {
+  position: relative;
+  display: grid;
+  isolation: isolate;
+}
+
+.dialog-content-image:not([hidden]) + .dialog-art { display: none; }
+
 .dialog-art {
   position: relative;
   isolation: isolate;
@@ -628,11 +646,10 @@ h1 em { color: #f4d29d; font-weight: 400; }
 .dialog-content-image {
   display: block;
   inline-size: 100%;
-  max-block-size: min(25rem, 52dvh);
+  max-block-size: min(31rem, 52dvh);
   object-fit: contain;
-  margin: 0 0 1rem;
-  border-radius: .45rem;
-  background: #efe8da;
+  border-block-end: 1px solid #dbbd87;
+  background: #142c23;
 }
 
 .dialog-text { color: #364752; font-size: 1rem; line-height: 1.7; white-space: pre-line; }
@@ -697,7 +714,7 @@ h1 em { color: #f4d29d; font-weight: 400; }
 }
 
 @media (forced-colors: active) {
-  .door-frost { display: none; }
+  .door-frost, .door-handle { display: none; }
   .calendar-door { border-color: ButtonText; }
   .calendar-door.is-today { border: 2px solid Highlight; }
   :is(a, button, select, [tabindex]):focus-visible { outline-color: Highlight; }
