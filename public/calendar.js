@@ -12,8 +12,7 @@
   const formatDay = day => String(day).padStart(2, '0');
   const pages = document.body.dataset.calendarMode === 'pages';
   const requestedPreview = !pages && new URLSearchParams(location.search).get('preview') === '1';
-  const state = { calendar: null, opened: new Set(), snow: true, snowMotionOptIn: false, serverOffset: 0, opening: false, weather: null };
-  const canAnimateSnow = () => !reducedMotion.matches || state.snowMotionOptIn;
+  const state = { calendar: null, opened: new Set(), snow: true, serverOffset: 0, opening: false, weather: null };
   let phaseTimer, activeDoor;
   function readLocal(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
   function writeLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* Der Kalender bleibt auch ohne Browserspeicher bedienbar. */ } }
@@ -261,7 +260,8 @@
     let baseRate = 0, baseLimit = 0, showerLimit = 0, baseCredit = 0, showerCredit = 0;
     let age = Infinity, elapsed = 0, gradient, sized = false;
     const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-    const moving = () => sized && state.snow && canAnimateSnow() && !document.hidden;
+    const moving = () => sized && state.snow && !document.hidden;
+    const motionScale = () => reducedMotion.matches ? .6 : 1;
     const randomBetween = ([min, max]) => min + Math.random() * (max - min);
 
     function makeSprite(paint) {
@@ -410,11 +410,9 @@
       const showDetail = detailContext && detailWidth && detailHeight && dialog.open;
       if (showDetail) detailContext.clearRect(0, 0, detailWidth, detailHeight);
       if (!state.snow) return;
-      if (canAnimateSnow()) {
-        drawFlakes(flakes);
-        drawFlakes(shower);
-        if (showDetail) drawFlakes(shower, detailContext, detailWidth, detailHeight);
-      }
+      drawFlakes(flakes);
+      drawFlakes(shower);
+      if (showDetail) drawFlakes(shower, detailContext, detailWidth, detailHeight);
       drawBank();
     }
 
@@ -438,14 +436,15 @@
       if (!moving()) return;
       if (!last) last = now;
       if (now - last >= 12) {
-        const dt = Math.min((now - last) / 1000, .05);
+        const scale = motionScale();
+        const dt = Math.min((now - last) / 1000, .05) * scale;
         age += (now - last) / 1000;
         elapsed += dt;
         last = now;
         advance(flakes, dt);
         advance(shower, dt);
-        baseCredit += baseRate * dt;
-        showerCredit += baseRate * 2.8 * showerStrength() * dt;
+        baseCredit += baseRate * dt * scale;
+        showerCredit += baseRate * 2.8 * showerStrength() * dt * scale;
         emit(flakes, Math.floor(baseCredit), baseLimit, false);
         emit(shower, Math.floor(showerCredit), showerLimit, true);
         baseCredit %= 1;
@@ -459,13 +458,16 @@
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
       last = 0;
-      if (!state.snow || !canAnimateSnow()) {
+      if (!state.snow) {
         age = Infinity;
         flakes.length = shower.length = 0;
         baseCredit = showerCredit = 0;
       }
       if (document.hidden) return;
-      if (moving() && !flakes.length) emit(flakes, clamp(Math.round(width / 70), 6, 18), baseLimit, false);
+      if (moving() && !flakes.length) {
+        const count = Math.round(clamp(width / 70, 6, 18) * motionScale());
+        emit(flakes, count, baseLimit, false);
+      }
       draw();
       if (moving()) raf = requestAnimationFrame(frame);
     }
@@ -521,24 +523,15 @@
         if (!moving()) return;
         age = 0;
         showerCredit = 0;
-        emit(shower, clamp(Math.round(width / 43), 8, 28), showerLimit, true);
+        const count = Math.round(clamp(width / 43, 8, 28) * motionScale());
+        emit(shower, count, showerLimit, true);
       },
       setEnabled: start,
     };
   }
-  function syncSnowMotionControl() {
-    const controls = $('snow-motion-controls');
-    const toggle = $('snow-motion-toggle');
-    const hidden = !reducedMotion.matches || !state.snow;
-    if (hidden && document.activeElement === toggle) $('snow-toggle').focus();
-    controls.hidden = hidden;
-    toggle.setAttribute('aria-pressed', String(state.snowMotionOptIn));
-  }
   function setSnow(enabled) {
     state.snow = enabled;
-    if (!enabled) state.snowMotionOptIn = false;
     $('snow-toggle').setAttribute('aria-pressed', String(enabled));
-    syncSnowMotionControl();
     state.weather?.setEnabled();
   }
   async function loadCalendar() {
@@ -581,16 +574,6 @@
     });
 
     $('snow-toggle').addEventListener('click', () => setSnow(!state.snow));
-    $('snow-motion-toggle').addEventListener('click', () => {
-      state.snowMotionOptIn = !state.snowMotionOptIn;
-      syncSnowMotionControl();
-      state.weather?.setEnabled();
-    });
-    reducedMotion.addEventListener('change', () => {
-      state.snowMotionOptIn = false;
-      syncSnowMotionControl();
-      state.weather?.setEnabled();
-    });
     $('dialog-title').tabIndex = -1;
     $('dialog-close').addEventListener('click', () => dialog.close());
     dialog.addEventListener('close', () => {
@@ -604,7 +587,6 @@
     });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) updateLighting(); });
     dialog.addEventListener('click', event => { if (event.target === dialog) { const rect = dialog.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close(); } });
-    syncSnowMotionControl();
     state.weather = createSnow();
     const photo = $('scene-world').querySelector('img');
     if (photo) {

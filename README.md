@@ -12,7 +12,7 @@ Für die November-Version auf GitHub reicht es, den Code zu übertragen, unter *
 
 Am 1. Dezember um Mitternacht endet die Vorschau in der Zeitzone Europe/Berlin. Auch eine noch zwischengespeicherte November-Seite sperrt dann die Beispieltürchen. Sobald GitHub die Advent-Version bereitstellt, öffnen sich die veröffentlichten Türchen nach Datum.
 
-Schneefall und Tagesbeleuchtung starten beim Laden. Die Beleuchtung wechselt auch bei offenem Kalender automatisch. Der Schneeschalter gilt für die aktuelle Ansicht. Bei der Systemeinstellung für reduzierte Bewegung bleibt der Schnee zunächst ruhig und lässt sich bei Bedarf animieren.
+Schneefall und Tagesbeleuchtung starten beim Laden. Die Beleuchtung wechselt auch bei offenem Kalender automatisch. Mit „Schnee“ lässt sich der Schneefall in der aktuellen Ansicht anhalten und wieder einschalten. Bei reduzierter Bewegung fallen weniger Flocken und sie bewegen sich langsamer.
 
 ## Einmalige Einrichtung auf GitHub
 

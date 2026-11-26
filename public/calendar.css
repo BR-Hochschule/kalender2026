@@ -111,17 +111,7 @@ svg {
 .brand strong { display: block; font: 700 1.12rem/1.2 var(--serif); }
 .brand small { display: block; margin-top: .17rem; color: var(--secondary); font-size: .8125rem; }
 
-.masthead-actions, .snow-motion {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .6rem;
-}
-
-.snow-motion { flex: 1 0 100%; color: var(--secondary); gap: .5rem .75rem; }
-.snow-motion span { font-size: .875rem; }
-
-.snow-toggle, .snow-motion button {
+.snow-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -136,15 +126,7 @@ svg {
   line-height: 1.25;
 }
 
-.snow-toggle:hover, .snow-motion button:hover { background: #30475e; }
-
-.snow-motion button[aria-pressed="true"] {
-  border-color: var(--brass);
-  background: var(--brass);
-  color: #1d252d;
-}
-
-.snow-motion button[aria-pressed="true"]::after { content: "✓"; }
+.snow-toggle:hover { background: #30475e; }
 
 .toggle-track {
   position: relative;
