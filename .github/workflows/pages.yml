@@ -35,7 +35,12 @@ jobs:
       - name: Veröffentlichung testen
         run: npm run test:pages
 
+      - name: Testmodus oder Advent bestimmen
+        id: mode
+        run: node --input-type=module -e 'import { pagesMode } from "./scripts/build-pages.mjs"; console.log("value=" + pagesMode());' >> "$GITHUB_OUTPUT"
+
       - name: Privates Inhaltsrepository prüfen
+        if: steps.mode.outputs.value == 'advent'
         env:
           CONTENT_REPO: ${{ vars.CONTENT_REPOSITORY }}
           CONTENT_TOKEN: ${{ secrets.CONTENT_READ_TOKEN }}
@@ -59,6 +64,7 @@ jobs:
           JS
 
       - name: Türchen-Inhalte laden
+        if: steps.mode.outputs.value == 'advent'
         uses: actions/checkout@v6
         with:
           repository: ${{ vars.CONTENT_REPOSITORY }}
@@ -66,7 +72,7 @@ jobs:
           path: private-content
           persist-credentials: false
 
-      - name: Kalender mit fälligen Türchen bauen
+      - name: Kalender bauen
         env:
           ADVENT_CONTENT_DIR: private-content
           ADVENT_CONTENT_REPO: ${{ vars.CONTENT_REPOSITORY }}

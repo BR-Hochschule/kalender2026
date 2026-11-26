@@ -48,11 +48,21 @@
   function doorMetadata(day) {
     return state.calendar?.doors.find(door => door.day === day);
   }
-  function canOpen(day) {
-    return Boolean(doorMetadata(day)?.available) && (!state.preview || day <= state.previewDay);
+  function isNovemberTest(date) {
+    if (!state.calendar?.novemberTest) return false;
+    const { year, month } = date ?? serverDateParts();
+    return year === state.calendar.year && month === 11;
+  }
+  function canOpen(day, novemberTest = isNovemberTest()) {
+    return Boolean(doorMetadata(day)?.available) &&
+      (!state.calendar.novemberTest || novemberTest) &&
+      (!state.preview || day <= state.previewDay);
   }
   function openedStorageKey(calendar) {
-    return calendar ? `advent-${calendar.year}-opened${calendar.preview ? '-preview' : ''}` : null;
+    if (!calendar) return null;
+    const key = `advent-${calendar.year}-opened`;
+    if (calendar.novemberTest) return `${key}-november-test`;
+    return calendar.preview ? `${key}-preview` : key;
   }
   function chooseAutoPhase() {
     const hour = serverDateParts().hour;
@@ -105,14 +115,24 @@
   function syncDoors() {
     const date = serverDateParts();
     const year = state.calendar.year;
-    const beforeAdvent = !state.preview && (date.year < year || (date.year === year && date.month < 12));
+    const novemberTest = isNovemberTest(date);
+    const showPreview = state.preview || novemberTest;
+    const beforeAdvent = !showPreview && (date.year < year || (date.year === year && date.month < 12));
     const isAdventDay = date.year === year && date.month === 12 && date.day <= 24;
     let today = isAdventDay ? date.day : null;
     if (state.preview) today = state.previewDay;
-    const todayAvailable = today !== null && canOpen(today);
+    const todayAvailable = today !== null && canOpen(today, novemberTest);
+
+    setText($('preview-badge'), novemberTest ? 'November-Test' : 'Vorschau');
+    $('preview-badge').hidden = !showPreview;
+    $('phase-controls').hidden = !showPreview;
+    $('preview-date').hidden = !showPreview;
+    $('preview-day-control').hidden = !state.preview;
+    $('live-mode').hidden = !state.preview;
+    if (!showPreview && state.phase !== 'auto') applyPhase('auto');
 
     for (const [day, button] of doorButtons) {
-      const available = canOpen(day);
+      const available = canOpen(day, novemberTest);
       const opened = state.opened.has(day);
       const isToday = available && day === today;
       const label = `Türchen ${formatDay(day)}`;
@@ -139,13 +159,16 @@
     }
 
     let message = 'Alle verfügbaren Türchen bleiben zugänglich.';
-    if (beforeAdvent) message = 'Advent startet am 1. Dezember.';
+    if (novemberTest) message = 'Alle 24 Türchen sind mit Beispielinhalten zum Testen geöffnet.';
+    else if (beforeAdvent) message = 'Advent startet am 1. Dezember.';
+    else if (state.calendar.novemberTest) message = 'Die November-Vorschau ist beendet. Der Adventkalender wird bereitgestellt.';
     else if (today !== null) {
       if (!todayAvailable) message = `Türchen ${formatDay(today)} ist derzeit nicht verfügbar.`;
       else if (state.preview) message = `Vorschau für den ${today}. Dezember.`;
       else message = `Heute öffnet Türchen ${formatDay(today)}.`;
     }
     setText(calendarMessage, message);
+    setText($('door-legend'), novemberTest ? 'Alle Türchen frei zum Ausprobieren' : 'Öffnet am jeweiligen Dezembertag');
     if (todayAvailable) {
       todayDoor.dataset.day = String(today);
       setText(todayDoor, `Türchen ${formatDay(today)} öffnen`);
@@ -155,14 +178,14 @@
     }
     todayDoor.hidden = !todayAvailable;
 
-    const count = state.opened.size;
+    const count = state.calendar.novemberTest && !novemberTest ? 0 : state.opened.size;
     setText($('opened-count'), String(count));
     $('progress-fill').style.width = `${count / 24 * 100}%`;
     setText($('year-label'), String(year));
   }
   function renderDoor(data) {
     $('dialog-day').textContent = formatDay(data.day);
-    $('dialog-eyebrow').textContent = `DEIN ${data.day}. TÜRCHEN${state.preview ? ' · VORSCHAU' : ''}`;
+    $('dialog-eyebrow').textContent = `DEIN ${data.day}. TÜRCHEN${state.preview || isNovemberTest() ? ' · VORSCHAU' : ''}`;
     $('dialog-title').textContent = data.title || 'Ein kleiner Lichtblick';
     $('dialog-text').textContent = data.text || '';
     const contentImage = $('dialog-image');
@@ -554,12 +577,9 @@
       const storedOpened = readLocal(storageKey, []);
       state.opened = new Set(Array.isArray(storedOpened) ? storedOpened.filter(day => Number.isInteger(day) && day >= 1 && day <= 24) : []);
     }
-    $('preview-badge').hidden = !state.preview;
-    $('phase-controls').hidden = !state.preview;
-    $('preview-date').hidden = !state.preview;
     $('error-message').hidden = true;
     syncDoors();
-    applyPhase(state.preview ? state.phase : 'auto');
+    applyPhase(state.preview || isNovemberTest() ? state.phase : 'auto');
     if (firstLoad) toast(requestedPreview && !state.preview ? 'Die Vorschau ist nur lokal oder nach Anmeldung in der Verwaltung verfügbar.' : '');
   }
   async function refreshCalendar() {
@@ -572,6 +592,7 @@
         setText(error, 'Die Türchen konnten gerade nicht geladen werden.');
         error.hidden = false;
       }
+      if (state.calendar?.novemberTest) syncDoors();
     } finally {
       $('scene-loading').hidden = true;
       setTimeout(refreshCalendar, 60_000);

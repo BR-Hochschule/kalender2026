@@ -8,7 +8,7 @@
   <title>Betriebsratskalender 2026 · Hochschule Campus Wien</title>
   <link rel="icon" href="./assets/stern.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./calendar.css?v=advent-2026-4">
-  <script src="./calendar.js?v=advent-2026-4" defer></script>
+  <script src="./calendar.js?v=advent-2026-5" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#hauptinhalt">Zum Hauptinhalt</a>
@@ -68,7 +68,7 @@
                 <span><strong id="opened-count">0</strong> von 24 geöffnet</span>
                 <span class="progress-track" aria-hidden="true"><span id="progress-fill"></span></span>
               </div>
-              <span class="door-legend"><svg aria-hidden="true"><use href="#i-lock"/></svg> Öffnet am jeweiligen Dezembertag</span>
+              <span class="door-legend"><svg aria-hidden="true"><use href="#i-lock"/></svg> <span id="door-legend">Öffnet am jeweiligen Dezembertag</span></span>
             </div>
           </section>
         </div>
@@ -89,7 +89,7 @@
             <button type="button" data-phase="evening" aria-pressed="false">Abend</button>
             <button type="button" data-phase="night" aria-pressed="false">Nacht</button>
           </div>
-          <div class="preview-day-control">
+          <div class="preview-day-control" id="preview-day-control">
             <label for="preview-day">Probetag</label>
             <select id="preview-day"></select>
             <span>Dezember</span>

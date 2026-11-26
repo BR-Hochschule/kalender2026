@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { buildPages } from '../scripts/build-pages.mjs';
+import { buildPages, pagesMode } from '../scripts/build-pages.mjs';
 
 async function fixture(t) {
   const folder = await mkdtemp(join(tmpdir(), 'advent-pages-'));
@@ -34,7 +34,7 @@ test('veröffentlicht Text, Links und Bilder erst ab Mitternacht in Europe/Berli
   await door('03', { freigeben: false, text: 'Ein Entwurf' });
   await door('24', {});
 
-  const before = await build('2026-11-30T22:59:59Z');
+  const before = await build('2026-10-31T22:59:59Z');
   assert.equal(before.doors.length, 24);
   assert.equal(before.doors.filter(door => door.available).length, 0);
   assert.deepEqual((await readdir(out)).sort(), ['assets', 'calendar.css', 'calendar.js', 'calendar.json', 'index.html']);
@@ -59,8 +59,32 @@ test('veröffentlicht Text, Links und Bilder erst ab Mitternacht in Europe/Berli
   assert.deepEqual(after.doors.filter(door => door.available).map(door => door.day), [1, 2, 24]);
   assert.equal(after.doors[1].content.text, 'Ein späteres Geheimnis');
 
-  await build('2026-11-30T22:59:59Z');
+  await build('2026-10-31T22:59:59Z');
   assert.ok(!(await readdir(out)).includes('media'));
+});
+
+test('schaltet im November alle Beispiele frei und wechselt am 1. Dezember zurück', async t => {
+  const { build, content, door, out } = await fixture(t);
+  await door('01', { text: 'Privater Dezembergruß' });
+  await writeFile(join(content, 'tueren', '24.json'), 'noch in Arbeit');
+
+  assert.equal(pagesMode(new Date('2026-10-31T22:59:59Z')), 'waiting');
+  assert.equal(pagesMode(new Date('2026-10-31T23:00:00Z')), 'november');
+  assert.equal(pagesMode(new Date('2026-11-30T23:00:00Z')), 'advent');
+
+  const november = await build('2026-11-30T22:59:59Z');
+  assert.equal(november.novemberTest, true);
+  assert.equal(november.doors.filter(door => door.available && door.content.title).length, 24);
+  assert.ok(november.doors[9].content.links.length);
+  assert.equal(november.doors[10].content.imageUrl, './assets/campus-advent-2026.webp');
+  assert.doesNotMatch(JSON.stringify(november), /Privater Dezembergruß|noch in Arbeit/);
+  assert.ok(!(await readdir(out)).includes('media'));
+
+  const december = await build('2026-11-30T23:00:00Z');
+  assert.equal(december.novemberTest, false);
+  assert.equal(december.doors.filter(door => door.available).length, 1);
+  assert.equal(december.doors[0].content.text, 'Privater Dezembergruß');
+  assert.deepEqual(december.doors[23], { day: 24, available: false });
 });
 
 test('verhindert das Kopieren von Bildpfaden außerhalb des privaten Bilderordners', async t => {

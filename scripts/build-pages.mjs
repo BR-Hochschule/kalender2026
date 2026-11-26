@@ -3,6 +3,7 @@ import { copyFile, lstat, mkdir, readFile, rm, writeFile } from 'node:fs/promise
 import { basename, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { imageMime } from '../image-type.mjs';
+import { calendarExamples } from '../calendar-examples.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const year = 2026;
@@ -16,6 +17,26 @@ const imageTypes = new Map([['.jpeg', 'image/jpeg'], ['.jpg', 'image/jpeg'], ['.
 function dateKey(date) {
   const parts = Object.fromEntries(dateFormat.formatToParts(date).map(part => [part.type, part.value]));
   return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+export function pagesMode(now = new Date()) {
+  const today = dateKey(now);
+  if (today >= `${year}-12-01`) return 'advent';
+  return today.startsWith(`${year}-11-`) ? 'november' : 'waiting';
+}
+
+function exampleDoor(day) {
+  const [title, text] = calendarExamples[day - 1];
+  return {
+    day,
+    title,
+    text,
+    imageUrl: day === 11 ? './assets/campus-advent-2026.webp' : '',
+    imageAlt: day === 11 ? 'Die verschneite Hochschule Campus Wien' : '',
+    links: day === 10 ? [
+      { label: 'Beispiellink öffnen', url: 'https://github.com/BR-Hochschule/klender2026' },
+    ] : [],
+  };
 }
 
 async function regularFile(directory, name) {
@@ -95,9 +116,14 @@ async function readDoor(contentDir, day, number) {
 export async function buildPages({ contentDir, contentRepository, out = join(root, 'dist'), now = new Date() } = {}) {
   if (contentRepository && !repoPattern.test(contentRepository)) throw new Error('Ungültiges Inhaltsrepository.');
   const today = dateKey(now);
+  const novemberTest = pagesMode(now) === 'november';
   const doors = [];
   const images = [];
   for (let day = 1; day <= 24; day++) {
+    if (novemberTest) {
+      doors.push({ day, available: true, content: exampleDoor(day) });
+      continue;
+    }
     const number = String(day).padStart(2, '0');
     const released = contentDir && today >= `${year}-12-${number}` ? await readDoor(contentDir, day, number) : null;
     if (released?.image) images.push(released.image);
@@ -115,7 +141,7 @@ export async function buildPages({ contentDir, contentRepository, out = join(roo
   await mkdir(join(out, 'assets'), { recursive: true });
   await Promise.all(publicFiles.map(name => copyFile(join(source, name), join(out, name))));
   await writeFile(join(out, 'index.html'), html);
-  await writeFile(join(out, 'calendar.json'), JSON.stringify({ year, timeZone, preview: false, doors }));
+  await writeFile(join(out, 'calendar.json'), JSON.stringify({ year, timeZone, preview: false, novemberTest, doors }));
   if (images.length) await mkdir(join(out, 'media'));
   await Promise.all(images.map(image => writeFile(join(out, image.path), image.bytes)));
   return doors.filter(door => door.available).length;
