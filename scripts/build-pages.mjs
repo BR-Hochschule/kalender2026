@@ -161,11 +161,16 @@ async function readDoor(contentDir, day, number, entries) {
   }
 }
 
-export async function buildPages({ contentDir, out = join(root, 'dist'), now = new Date() } = {}) {
+export async function buildPages({
+  contentDir,
+  now = new Date(),
+  previewContent = false,
+  out = join(root, previewContent ? 'private-content/vorschau' : 'dist'),
+} = {}) {
   const today = dateKey(now);
   const mode = pagesMode(now);
-  const novemberTest = mode === 'november';
-  const entries = contentDir && mode === 'advent' ? await readCalendarContent(contentDir) : undefined;
+  const novemberTest = mode === 'november' && !previewContent;
+  const entries = contentDir && (previewContent || mode === 'advent') ? await readCalendarContent(contentDir) : undefined;
   const doors = [];
   const images = [];
   for (let day = 1; day <= 24; day++) {
@@ -174,7 +179,8 @@ export async function buildPages({ contentDir, out = join(root, 'dist'), now = n
       continue;
     }
     const number = String(day).padStart(2, '0');
-    const released = contentDir && today >= `${year}-12-${number}` ? await readDoor(contentDir, day, number, entries) : null;
+    const due = previewContent || today >= `${year}-12-${number}`;
+    const released = contentDir && due ? await readDoor(contentDir, day, number, entries) : null;
     if (released?.image) images.push(released.image);
     doors.push(released ? { day, available: true, content: released.content } : { day, available: false });
   }
@@ -187,7 +193,7 @@ export async function buildPages({ contentDir, out = join(root, 'dist'), now = n
   await mkdir(join(out, 'assets'), { recursive: true });
   await Promise.all(publicFiles.map(name => copyFile(join(source, name), join(out, name))));
   await writeFile(join(out, 'index.html'), html);
-  await writeFile(join(out, 'calendar.json'), JSON.stringify({ year, timeZone, preview: false, novemberTest, doors }));
+  await writeFile(join(out, 'calendar.json'), JSON.stringify({ year, timeZone, preview: previewContent, novemberTest, doors }));
   if (images.length) await mkdir(join(out, 'media'));
   await Promise.all(images.map(image => writeFile(join(out, image.path), image.bytes)));
   return doors.filter(door => door.available).length;
@@ -195,10 +201,15 @@ export async function buildPages({ contentDir, out = join(root, 'dist'), now = n
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
+    const previewContent = process.argv.includes('--inhaltsvorschau');
+    const contentDir = process.env.ADVENT_CONTENT_DIR ?? (previewContent ? join(root, 'private-content') : undefined);
     const count = await buildPages({
-      contentDir: process.env.ADVENT_CONTENT_DIR,
+      contentDir,
+      previewContent,
     });
-    console.log(`GitHub Pages liegt in dist/. ${count} Türchen sind veröffentlicht.`);
+    console.log(previewContent
+      ? `Die lokale Inhaltsvorschau liegt in private-content/vorschau/. ${count} Türchen sind verfügbar.`
+      : `GitHub Pages liegt in dist/. ${count} Türchen sind veröffentlicht.`);
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;

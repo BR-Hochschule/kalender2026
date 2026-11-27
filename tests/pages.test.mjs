@@ -128,6 +128,34 @@ test('meldet ungültige gemeinsame JSON-Dateien ohne private Inhalte auszugeben'
   await assert.rejects(build('2026-12-01T08:00:00Z'), /tuerchen\.json.*Türchennummern von 1 bis 24/);
 });
 
+test('zeigt echte Türchen vor ihrem Datum nur in der lokalen Inhaltsvorschau', async t => {
+  const { build, content, out } = await fixture(t);
+  const photo = await readFile(new URL('../public/assets/campus-advent-2026.webp', import.meta.url));
+  await writeFile(join(content, 'bilder', '1.webp'), photo);
+  const url = 'https://example.com/echter-advent?tag=1';
+  await writeFile(join(content, 'tuerchen.json'), JSON.stringify({
+    1: { titel: 'Willkommen', text: 'Echter Adventsgruß', links: [{ titel: 'Weitere Infos', url }], freigeben: true },
+    2: { titel: 'Entwurf', freigeben: false },
+  }));
+
+  const date = '2026-11-27T12:00:00Z';
+  await buildPages({ contentDir: content, out, now: new Date(date), previewContent: true });
+  const privatePreview = JSON.parse(await readFile(join(out, 'calendar.json'), 'utf8'));
+  assert.equal(privatePreview.preview, true);
+  assert.equal(privatePreview.novemberTest, false);
+  assert.deepEqual(privatePreview.doors.filter(item => item.available).map(item => item.day), [1]);
+  assert.equal(privatePreview.doors[0].content.text, 'Echter Adventsgruß');
+  assert.equal(privatePreview.doors[0].content.links[0].url, url);
+  assert.match(privatePreview.doors[0].content.imageUrl, /^\.\/media\/01-/);
+  assert.ok(!(await readdir(out)).includes('tuerchen.json'));
+
+  const publicPreview = await build(date);
+  assert.equal(publicPreview.preview, false);
+  assert.equal(publicPreview.novemberTest, true);
+  assert.doesNotMatch(JSON.stringify(publicPreview), /Echter Adventsgruß|echter-advent/);
+  assert.ok(!(await readdir(out)).includes('media'));
+});
+
 test('verhindert das Kopieren von Bildpfaden außerhalb des privaten Bilderordners', async t => {
   const { content, door, build } = await fixture(t);
   await writeFile(join(content, 'geheim.png'), 'nicht veröffentlichen');

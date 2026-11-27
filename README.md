@@ -69,4 +69,15 @@ python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
 
 Anschließend [lokalen Pages-Build ansehen](http://127.0.0.1:4173/). Im November sind die Beispieltürchen sofort verfügbar. Für einen lokalen Advent-Build verwendet `ADVENT_CONTENT_DIR=private-content npm run build:pages` den entpackten privaten Inhaltsordner und prüft das aktuelle Datum. `dist/` wird bei jedem Build neu erstellt.
 
+### Echte Inhalte vor Dezember testen
+
+`tuerchen.json` und den Ordner `bilder/` nach `private-content/` legen. Die folgende Vorschau liest deine tatsächlichen Texte, Links und Bilder und öffnet die vorbereiteten Türchen mit `"freigeben": true` schon vor ihrem Dezembertag. Sie verwendet den lokalen Ordner `private-content/vorschau/`.
+
+```sh
+npm run build:inhaltsvorschau
+python3 -m http.server 4188 --bind 127.0.0.1 --directory private-content/vorschau
+```
+
+Anschließend die [lokale Inhaltsvorschau öffnen](http://127.0.0.1:4188/). Nach Änderungen an `tuerchen.json` oder `bilder/` den Build-Befehl erneut ausführen und neu laden.
+
 Der lokale Node-Server mit Verwaltung lässt sich weiterhin mit `npm run preview` starten. Sein zufällig erzeugtes Verwaltungspasswort liegt in `data/ADMIN-ZUGANG.txt`. Der Node-Server und die SQLite-Datenbank sind von der Pages-Veröffentlichung getrennt.

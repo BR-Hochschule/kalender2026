@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node server.mjs",
     "preview": "node start-local.mjs",
+    "build:inhaltsvorschau": "node scripts/build-pages.mjs --inhaltsvorschau",
     "build:pages": "node scripts/build-pages.mjs",
     "test:pages": "node --test tests/pages.test.mjs",
     "test": "node --test tests/*.test.mjs",
