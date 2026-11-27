@@ -144,7 +144,7 @@ async function readDoor(contentDir, day, number, entries) {
     const entry = entries === undefined
       ? await readJson(join(contentDir, 'tueren'), `${number}.json`, maxDoorSize)
       : entries[day];
-    if (entry === undefined) return null;
+    if (entry === undefined) return undefined;
     if (!entry || typeof entry.freigeben !== 'boolean') throw new Error('Das Feld „freigeben“ muss true oder false sein.');
     if (!entry.freigeben) return null;
     const title = cleanText(entry.titel, 160, 'Titel');
@@ -163,6 +163,7 @@ async function readDoor(contentDir, day, number, entries) {
 
 export async function buildPages({
   contentDir,
+  publicContentDir,
   now = new Date(),
   previewContent = false,
   out = join(root, previewContent ? 'private-content/vorschau' : 'dist'),
@@ -171,18 +172,25 @@ export async function buildPages({
   const mode = pagesMode(now);
   const novemberTest = mode === 'november' && !previewContent;
   const entries = contentDir && (previewContent || mode === 'advent') ? await readCalendarContent(contentDir) : undefined;
+  const publicEntries = publicContentDir && !previewContent && mode !== 'waiting'
+    ? await readCalendarContent(publicContentDir) : undefined;
   const doors = [];
   const images = [];
   for (let day = 1; day <= 24; day++) {
-    if (novemberTest) {
-      doors.push({ day, available: true, content: exampleDoor(day) });
-      continue;
-    }
     const number = String(day).padStart(2, '0');
     const due = previewContent || today >= `${year}-12-${number}`;
-    const released = contentDir && due ? await readDoor(contentDir, day, number, entries) : null;
-    if (released?.image) images.push(released.image);
-    doors.push(released ? { day, available: true, content: released.content } : { day, available: false });
+    let released = contentDir && due ? await readDoor(contentDir, day, number, entries) : undefined;
+    if (released === undefined && publicEntries && (due || (novemberTest && day === 1))) {
+      released = await readDoor(publicContentDir, day, number, publicEntries);
+    }
+    if (released) {
+      if (released.image) images.push(released.image);
+      doors.push({ day, available: true, content: released.content });
+    } else if (novemberTest) {
+      doors.push({ day, available: true, content: exampleDoor(day) });
+    } else {
+      doors.push({ day, available: false });
+    }
   }
 
   const source = join(root, 'public');
@@ -205,6 +213,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const contentDir = process.env.ADVENT_CONTENT_DIR ?? (previewContent ? join(root, 'private-content') : undefined);
     const count = await buildPages({
       contentDir,
+      publicContentDir: join(root, 'public-content'),
       previewContent,
     });
     console.log(previewContent

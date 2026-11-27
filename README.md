@@ -6,9 +6,9 @@ Die Redaktion arbeitet im privaten GitHub-Repository. GitHub Actions stellt den 
 
 ## Im November testen
 
-Im November 2026 öffnet der Kalender alle 24 Türchen mit Beispielinhalten. Türchen 10 enthält einen Link, Türchen 11 ein Bild. Der Fortschritt im November wird getrennt vom Dezember gespeichert.
+Im November 2026 öffnet der Kalender alle 24 Türchen. Türchen 1 zeigt den Begrüßungstext und den Sway-Link aus `public-content/tuerchen.json`. Die übrigen Türchen zeigen Beispiele. Der Fortschritt im November wird getrennt vom Dezember gespeichert.
 
-Für die November-Version auf GitHub reicht es, den Code zu übertragen, unter **Settings → Pages** die Quelle **GitHub Actions** zu wählen und unter **Actions → Adventkalender veröffentlichen → Run workflow** zu starten. Das private Inhaltsrepository wird erst für den Advent benötigt.
+Für die November-Version auf GitHub reicht es, den Code zu übertragen, unter **Settings → Pages** die Quelle **GitHub Actions** zu wählen und unter **Actions → Adventkalender veröffentlichen → Run workflow** zu starten. Ab Dezember haben Einträge aus dem privaten Inhaltsrepository Vorrang. Falls es noch nicht eingerichtet ist, bleibt Türchen 1 aus dem öffentlichen Ordner verfügbar. Inhalte, die erst am jeweiligen Dezembertag sichtbar sein sollen, gehören in das private Inhaltsrepository.
 
 Am 1. Dezember um Mitternacht endet die Vorschau in der Zeitzone Europe/Berlin. Auch eine noch zwischengespeicherte November-Seite sperrt dann die Beispieltürchen. Sobald GitHub die Advent-Version bereitstellt, öffnen sich die veröffentlichten Türchen nach Datum.
 
@@ -67,7 +67,7 @@ npm run build:pages
 python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
 ```
 
-Anschließend [lokalen Pages-Build ansehen](http://127.0.0.1:4173/). Im November sind die Beispieltürchen sofort verfügbar. Für einen lokalen Advent-Build verwendet `ADVENT_CONTENT_DIR=private-content npm run build:pages` den entpackten privaten Inhaltsordner und prüft das aktuelle Datum. `dist/` wird bei jedem Build neu erstellt.
+Anschließend [lokalen Pages-Build ansehen](http://127.0.0.1:4173/). Im November sind Türchen 1 und die Beispieltürchen sofort verfügbar. Für einen lokalen Advent-Build verwendet `ADVENT_CONTENT_DIR=private-content npm run build:pages` den entpackten privaten Inhaltsordner und prüft das aktuelle Datum. `dist/` wird bei jedem Build neu erstellt.
 
 ### Echte Inhalte vor Dezember testen
 

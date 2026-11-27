@@ -1,0 +1,14 @@
+{
+  "1": {
+    "titel": "Herzlich willkommen",
+    "text": "Herzlich Willkommen beim heurigen Betriebsrats-Adventkalender, neben der Seite im Intranet, haben wir auch eine eigene Sway-Seite, auf der aktuelle Informationen und Aktionen gesammelt zur Verfügung stehen",
+    "bildbeschreibung": "Foto des Betriebsrats",
+    "links": [
+      {
+        "titel": "Sway-Seite des Betriebsrats öffnen",
+        "url": "https://sway.cloud.microsoft/GuYVwNYTAgY4SbWu?ref=Link&loc=play"
+      }
+    ],
+    "freigeben": true
+  }
+}

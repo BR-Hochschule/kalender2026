@@ -40,13 +40,18 @@ jobs:
         run: node --input-type=module -e 'import { pagesMode } from "./scripts/build-pages.mjs"; console.log("value=" + pagesMode());' >> "$GITHUB_OUTPUT"
 
       - name: Privates Inhaltsrepository prüfen
+        id: content
         if: steps.mode.outputs.value == 'advent'
         env:
           CONTENT_REPO: ${{ vars.CONTENT_REPOSITORY }}
           CONTENT_TOKEN: ${{ secrets.CONTENT_READ_TOKEN }}
         run: |
-          node --input-type=module <<'JS'
+          node --input-type=module <<'JS' >> "$GITHUB_OUTPUT"
           const { CONTENT_REPO, CONTENT_TOKEN, GITHUB_REPOSITORY } = process.env;
+          if (!CONTENT_REPO && !CONTENT_TOKEN) {
+            console.log('configured=false');
+            process.exit(0);
+          }
           if (!CONTENT_REPO || !CONTENT_TOKEN) {
             throw new Error('CONTENT_REPOSITORY und CONTENT_READ_TOKEN gemäß README einrichten.');
           }
@@ -61,10 +66,11 @@ jobs:
           if (!reply.ok || (await reply.json()).visibility !== 'private') {
             throw new Error('Das Inhaltsrepository muss privat und mit dem hinterlegten Token lesbar sein.');
           }
+          console.log('configured=true');
           JS
 
       - name: Türchen-Inhalte laden
-        if: steps.mode.outputs.value == 'advent'
+        if: steps.content.outputs.configured == 'true'
         uses: actions/checkout@v6
         with:
           repository: ${{ vars.CONTENT_REPOSITORY }}

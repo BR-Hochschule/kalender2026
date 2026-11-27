@@ -17,8 +17,8 @@ async function fixture(t) {
       titel: `Gruß ${day}`, text: `Text ${day}`, freigeben: true, ...fields,
     }));
   };
-  const build = async (timestamp) => {
-    await buildPages({ contentDir: content, out, now: new Date(timestamp) });
+  const build = async (timestamp, options) => {
+    await buildPages({ contentDir: content, out, now: new Date(timestamp), ...options });
     return JSON.parse(await readFile(join(out, 'calendar.json'), 'utf8'));
   };
   return { content, out, door, build };
@@ -128,7 +128,7 @@ test('meldet ungültige gemeinsame JSON-Dateien ohne private Inhalte auszugeben'
   await assert.rejects(build('2026-12-01T08:00:00Z'), /tuerchen\.json.*Türchennummern von 1 bis 24/);
 });
 
-test('zeigt echte Türchen vor ihrem Datum nur in der lokalen Inhaltsvorschau', async t => {
+test('zeigt private Türchen vor ihrem Datum in der lokalen Inhaltsvorschau', async t => {
   const { build, content, out } = await fixture(t);
   const photo = await readFile(new URL('../public/assets/campus-advent-2026.webp', import.meta.url));
   await writeFile(join(content, 'bilder', '1.webp'), photo);
@@ -154,6 +154,40 @@ test('zeigt echte Türchen vor ihrem Datum nur in der lokalen Inhaltsvorschau', 
   assert.equal(publicPreview.novemberTest, true);
   assert.doesNotMatch(JSON.stringify(publicPreview), /Echter Adventsgruß|echter-advent/);
   assert.ok(!(await readdir(out)).includes('media'));
+});
+
+test('zeigt im November den öffentlichen Gruß aus Türchen 1 neben den Beispielen', async t => {
+  const { build, content } = await fixture(t);
+  const publicContentDir = join(content, 'public');
+  await mkdir(publicContentDir);
+  const url = 'https://example.com/begruessung?tag=1&modus=lesen';
+  await writeFile(join(publicContentDir, 'tuerchen.json'), JSON.stringify({
+    1: { titel: 'Willkommen', text: 'Öffentlicher Adventsgruß', links: [{ titel: 'Weitere Infos', url }], freigeben: true },
+    2: { titel: 'Zweiter Adventsgruß', freigeben: true },
+  }));
+  await writeFile(join(content, 'tuerchen.json'), JSON.stringify({
+    1: { titel: 'Privater Dezembergruß', freigeben: true },
+    2: { titel: 'Späterer privater Gruß', freigeben: true },
+  }));
+
+  const october = await build('2026-10-31T22:59:59Z', { publicContentDir });
+  assert.equal(october.doors.some(item => item.available), false);
+
+  const november = await build('2026-11-30T22:59:59Z', { publicContentDir });
+  assert.equal(november.novemberTest, true);
+  assert.equal(november.doors.filter(item => item.available).length, 24);
+  assert.equal(november.doors[0].content.text, 'Öffentlicher Adventsgruß');
+  assert.deepEqual(november.doors[0].content.links, [{ label: 'Weitere Infos', url }]);
+  assert.doesNotMatch(JSON.stringify(november), /Zweiter Adventsgruß|Privater Dezembergruß|Späterer privater Gruß/);
+
+  const december = await build('2026-11-30T23:00:00Z', { publicContentDir });
+  assert.equal(december.novemberTest, false);
+  assert.equal(december.doors[0].content.title, 'Privater Dezembergruß');
+  assert.deepEqual(december.doors[1], { day: 2, available: false });
+
+  const withoutPrivateContent = await build('2026-11-30T23:00:00Z', { publicContentDir, contentDir: undefined });
+  assert.equal(withoutPrivateContent.doors[0].content.text, 'Öffentlicher Adventsgruß');
+  assert.deepEqual(withoutPrivateContent.doors[1], { day: 2, available: false });
 });
 
 test('verhindert das Kopieren von Bildpfaden außerhalb des privaten Bilderordners', async t => {
